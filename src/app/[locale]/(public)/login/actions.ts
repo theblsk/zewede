@@ -64,3 +64,13 @@ export async function signup(formData: FormData) {
   revalidatePath(`/${locale}`, "layout");
   redirect(`/${locale}`);
 }
+
+export async function logout() {
+  const locale = await getLocale();
+  const supabase = await createClient();
+
+  await supabase.auth.signOut();
+
+  revalidatePath(`/${locale}`, "layout");
+  redirect(`/${locale}`);
+}

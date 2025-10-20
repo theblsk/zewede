@@ -4,7 +4,10 @@
     "home": "Home",
     "menu": "Menu",
     "about": "About",
-    "contact": "Contact"
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "login": "Login",
+    "logout": "Logout"
   },
   "hero": {
     "subtitle": "The Refaat Hallab branch in Kalamoun",

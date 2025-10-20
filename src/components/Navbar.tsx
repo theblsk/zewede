@@ -15,10 +15,15 @@ import { useLocale, useTranslations } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useState } from 'react';
 import { Link } from "@heroui/react";
+import { logout } from "@/app/[locale]/(public)/login/actions";
 
-export default function PublicNavbar() {
+type PublicNavbarProps = {
+  showDashboardLink?: boolean;
+  isLoggedIn?: boolean;
+};
+
+export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = false }: PublicNavbarProps) {
   const t = useTranslations('navbar');
-
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const locale = useLocale(); // 'en' | 'ar'
@@ -67,6 +72,47 @@ export default function PublicNavbar() {
       </NavbarContent>
 
       <NavbarContent justify="end">
+        {/* Show Dashboard link only for managers/admins */}
+        {showDashboardLink && (
+          <NavbarItem className="hidden sm:block">
+            <Link
+              href={`/${locale}/dashboard`}
+              className="text-white hover:text-hlb-gold transition-colors"
+            >
+              {t('dashboard')}
+            </Link>
+          </NavbarItem>
+        )}
+        
+        {/* Show Logout for all logged-in users */}
+        {isLoggedIn ? (
+          <NavbarItem className="hidden sm:block">
+            <Button
+              onPress={() => logout()}
+              color="danger"
+              variant="solid"
+              size="sm"
+              className="font-semibold"
+            >
+              {t('logout')}
+            </Button>
+          </NavbarItem>
+        ) : (
+          // Show login button for all unauthenticated users
+          <NavbarItem className="hidden sm:block">
+            <Button
+              as={Link}
+              href={`/${locale}/login`}
+              color="warning"
+              variant="solid"
+              size="sm"
+              className="font-semibold"
+            >
+              {t('login')}
+            </Button>
+          </NavbarItem>
+        )}
+        
         <NavbarItem>
           <Button
             variant="light"
@@ -96,6 +142,52 @@ export default function PublicNavbar() {
             </Link>
           </NavbarMenuItem>
         ))}
+        
+        {/* Show Dashboard link in mobile menu only for managers/admins */}
+        {showDashboardLink && (
+          <NavbarMenuItem key="dashboard">
+            <Link
+              href={`/${locale}/dashboard`}
+              className="w-full text-white hover:text-hlb-gold transition-colors py-2"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t('dashboard')}
+            </Link>
+          </NavbarMenuItem>
+        )}
+        
+        {/* Show Logout for all logged-in users in mobile menu */}
+        {isLoggedIn ? (
+          <NavbarMenuItem key="logout">
+            <Button
+              onPress={() => {
+                setIsMenuOpen(false);
+                logout();
+              }}
+              color="danger"
+              variant="solid"
+              size="sm"
+              className="w-full font-semibold"
+            >
+              {t('logout')}
+            </Button>
+          </NavbarMenuItem>
+        ) : (
+          // Show login button for all unauthenticated users in mobile menu
+          <NavbarMenuItem key="login">
+            <Button
+              as={Link}
+              href={`/${locale}/login`}
+              color="warning"
+              variant="solid"
+              size="sm"
+              className="w-full font-semibold"
+              onClick={() => setIsMenuOpen(false)}
+            >
+              {t('login')}
+            </Button>
+          </NavbarMenuItem>
+        )}
       </NavbarMenu>
     </Navbar>
   );

@@ -58,10 +58,7 @@ export async function updateSession(
 
     if (
       !user &&
-      isProtectedRoute(pathname, locale) &&
-      !pathname.startsWith(`/${locale}/login`) &&
-      !pathname.startsWith(`/${locale}/auth`) &&
-      !pathname.startsWith(`/${locale}/error`)
+      isProtectedRoute(pathname, locale)
     ) {
       // no user, potentially respond by redirecting the user to the login page
       const url = request.nextUrl.clone()

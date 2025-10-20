@@ -2,9 +2,7 @@
 
 import { FormInput, formSchema } from "@/app/config/onboard-form.config";
 import { createClient } from "@/utils/supabase/server";
-import { Database } from "@/types/supabase";
-
-type UsersRowType = Database['public']['Tables']['users']['Row'];
+import { UsersRowType } from "@/types/derived";
 
 export async function onboarding(formData: FormInput) {
   try {

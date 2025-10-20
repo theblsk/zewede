@@ -1,13 +1,17 @@
 import PublicNavbar from '@/components/Navbar';
+import { checkUserOnboarded } from '@/utils/auth.utils';
 
-export default function PublicLayout({
+export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const userData = await checkUserOnboarded();
+  const isLoggedIn = userData !== null;
+  const showDashboardLink = userData ? userData.role !== 'CUSTOMER' : false;
   return (
     <>
-      <PublicNavbar />
+      <PublicNavbar showDashboardLink={showDashboardLink} isLoggedIn={isLoggedIn} />
       {children}
     </>
   );

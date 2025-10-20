@@ -2,10 +2,16 @@ import { getTranslations } from 'next-intl/server';
 import { getLocale } from 'next-intl/server';
 import OnboardingForm from '@/components/forms/OnboardingForm';
 import { getCountryOptions } from '@/utils/country-codes';
+import { checkUserOnboarded } from '@/utils/auth.utils';
+import { redirect } from 'next/navigation';
 
 export default async function OnboardingPage() {
   const t = await getTranslations('onboarding.form');
+  const userData = await checkUserOnboarded();
   const locale = await getLocale();
+  if (userData) {
+    redirect(`/${locale}`);
+  }
   const countryOptions = getCountryOptions(locale);
 
   return (

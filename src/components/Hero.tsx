@@ -2,22 +2,30 @@
 
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
-import { useLocale, useTranslations } from 'next-intl';
+import { Chip } from "@heroui/chip";
+import { useTranslations } from 'next-intl';
 
 export default function Hero() {
   const t = useTranslations('hero');
-  const locale = useLocale();
-  const isRTL = locale === 'ar';
+  const sinceText = t('since');
+  const sinceMatch = sinceText.match(/^(.*?)(\d{3,})$/);
+  const sinceLabel = sinceMatch ? sinceMatch[1].trim() : sinceText;
+  const sinceYear = sinceMatch ? sinceMatch[2] : '';
 
   return (
     <section id="home" className="py-16 px-6 bg-hlb-bg">
       <div className="max-w-7xl mx-auto">
-        <div className={`flex flex-col lg:flex-row items-center gap-12 ${isRTL ? 'lg:flex-row-reverse' : ''}`}>
+        <div className="flex flex-col lg:flex-row items-center gap-12">
           {/* Left side - Text content */}
-          <div className={`flex-1 ${isRTL ? 'text-right' : 'text-left'}`}>
-            <p className="text-hlb-text text-lg mb-4">
-              {t('subtitle')}
-            </p>
+          <div className="flex-1 text-start">
+            <div className="mb-6 flex justify-start">
+              <Chip
+                className="bg-gradient-to-r from-hlb-primary/5 via-hlb-primary/10 to-hlb-gold/10 border-1.5 border-hlb-primary/25 text-hlb-primary font-semibold text-sm sm:text-base md:text-lg px-1 sm:px-3 py-6 sm:py-7 h-auto"
+                variant="flat"
+              >
+                {t('subtitle')}
+              </Chip>
+            </div>
             <h1 className="text-4xl lg:text-6xl font-bold text-hlb-primary mb-6 leading-tight">
               {t('title')}
             </h1>
@@ -49,12 +57,24 @@ export default function Hero() {
             </div>
 
             {/* Since 1881 card */}
-            <Card className="bg-white border-2 border-hlb-primary max-w-xs">
-              <CardBody className="text-center py-4">
-                <h3 className="text-hlb-primary font-bold text-lg">
-                  {t('since')}
-                </h3>
-                <p className="text-hlb-text-light text-sm">
+            <Card className="relative max-w-xs w-full overflow-hidden border-none shadow-lg shadow-hlb-primary/20 bg-gradient-to-br from-white via-hlb-bg to-hlb-gold/10">
+              <div className="pointer-events-none absolute -top-16 right-10 h-32 w-32 rounded-full bg-hlb-gold/30 blur-2xl" />
+              <div className="pointer-events-none absolute -bottom-14 left-6 h-20 w-20 rounded-full border border-hlb-primary/20" />
+              <CardBody className="relative flex flex-col items-center gap-4 px-8 py-6">
+                <span className="inline-flex items-center gap-2 rounded-full border border-hlb-primary/20 bg-white/80 px-4 py-1 text-xs font-semibold uppercase tracking-[0.35em] text-hlb-primary">
+                  <span className="h-2 w-2 rounded-full bg-hlb-gold" />
+                  {sinceLabel}
+                </span>
+                {sinceYear ? (
+                  <h3 className="text-4xl font-extrabold tracking-tight text-hlb-primary">
+                    {sinceYear}
+                  </h3>
+                ) : (
+                  <h3 className="text-2xl font-semibold tracking-tight text-hlb-primary text-center">
+                    {sinceText}
+                  </h3>
+                )}
+                <p className="text-sm leading-relaxed text-hlb-text-light text-center">
                   {t('traditional')}
                 </p>
               </CardBody>

@@ -8,9 +8,12 @@ import { getLocale } from 'next-intl/server';
 export default async function Home() {
   const locale = await getLocale();
   const userData = await checkUserOnboarded();
-  if (!userData) {
+  
+  // Only redirect to onboarding if user is logged in but not onboarded
+  if (userData === undefined) {
     redirect(`/${locale}/onboarding`);
   }
+  
   return (
     <main>
       <Hero />
