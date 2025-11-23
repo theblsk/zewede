@@ -20,6 +20,7 @@
   "menu": {
     "title": "Our Delicious Menu",
     "subtitle": "Handcrafted Lebanese sweets made with the finest ingredients",
+    "all": "All",
     "availableToday": "Available Today",
     "orderTomorrow": "Order Tomorrow",
     "addToOrder": "Add to Order"
@@ -43,8 +44,75 @@
     "callNow": "Call Now"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "welcome": "Welcome to your protected dashboard! This page is only accessible to authenticated users."
+    "title": "Menu Manager",
+    "welcome": "Manage categories, menu items, and pricing in one place.",
+    "goToMenuItems": "Go to Menu Items",
+    "goToCategories": "Go to Categories",
+    "categories": {
+      "title": "Categories",
+      "subtitle": "Manage your menu categories",
+      "new": "New Category",
+      "edit": "Edit Category",
+      "delete": "Delete",
+      "name": "Name",
+      "name_ar": "Arabic Name",
+      "description": "Description",
+      "description_ar": "Arabic Description",
+      "displayOrder": "Display Order",
+      "isActive": "Active",
+      "createSubtitle": "Add a new category to your menu",
+      "editSubtitle": "Update category details",
+      "details": "Category Details",
+      "create": "Create Category",
+      "saveChanges": "Save Changes",
+      "form": {
+        "name": "Name",
+        "nameAr": "Arabic Name",
+        "description": "Description",
+        "descriptionAr": "Arabic Description",
+        "active": "Active"
+      }
+    },
+    "items": {
+      "title": "Menu Items",
+      "subtitle": "Manage your menu items",
+      "new": "Add Item",
+      "edit": "Edit Item",
+      "delete": "Delete",
+      "name": "Item Name",
+      "description": "Description",
+      "availability": "Available",
+      "isActive": "Active",
+      "prices": "Prices",
+      "createSubtitle": "Add a new item to your menu",
+      "editSubtitle": "Update menu item details",
+      "details": "Menu Item Details",
+      "create": "Create Menu Item",
+      "saveChanges": "Save Changes",
+      "form": {
+        "category": "Category",
+        "selectCategory": "Select a category",
+        "name": "Name",
+        "nameAr": "Arabic Name",
+        "description": "Description",
+        "descriptionAr": "Arabic Description",
+        "priceUnit": "Price Unit",
+        "gram": "Gram",
+        "box": "Box",
+        "priceCount": "Price Count",
+        "priceAmount": "Price Amount (USD)",
+        "maxOrderLimitUnit": "Max Order Limit Unit (Optional)",
+        "selectUnit": "Select unit",
+        "maxOrderLimitValue": "Max Order Limit Value (Optional)",
+        "available": "Available",
+        "active": "Active",
+        "image": "Image"
+      }
+    },
+    "search": {
+      "placeholder": "Search menu items",
+      "results": "Search Results"
+    }
   },
   "onboarding": {
     "form": {

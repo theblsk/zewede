@@ -14,6 +14,232 @@ export type Database = {
   }
   public: {
     Tables: {
+      categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      categories_translations: {
+        Row: {
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          locale: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_translations_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_item_max_order_limits: {
+        Row: {
+          created_at: string
+          id: string
+          limit_value: number
+          menu_item_id: string
+          unit: Database["public"]["Enums"]["order_limit_unit"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          limit_value: number
+          menu_item_id: string
+          unit: Database["public"]["Enums"]["order_limit_unit"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          limit_value?: number
+          menu_item_id?: string
+          unit?: Database["public"]["Enums"]["order_limit_unit"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_item_max_order_limits_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_item_price: {
+        Row: {
+          count: number
+          created_at: string
+          id: string
+          menu_item_id: string
+          price: number
+          type: Database["public"]["Enums"]["sell_unit"]
+          updated_at: string
+        }
+        Insert: {
+          count: number
+          created_at?: string
+          id?: string
+          menu_item_id: string
+          price: number
+          type: Database["public"]["Enums"]["sell_unit"]
+          updated_at?: string
+        }
+        Update: {
+          count?: number
+          created_at?: string
+          id?: string
+          menu_item_id?: string
+          price?: number
+          type?: Database["public"]["Enums"]["sell_unit"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_item_price_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items: {
+        Row: {
+          availability: boolean
+          category_id: string
+          created_at: string
+          description: string | null
+          id: string
+          image_key: string | null
+          is_active: boolean
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          availability?: boolean
+          category_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_key?: string | null
+          is_active?: boolean
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          availability?: boolean
+          category_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_key?: string | null
+          is_active?: boolean
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      menu_items_translations: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          locale: string
+          menu_item_id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale: string
+          menu_item_id: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          locale?: string
+          menu_item_id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_translations_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
@@ -55,12 +281,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
+      is_staff: { Args: never; Returns: boolean }
     }
     Enums: {
+      order_limit_unit: "box" | "gram"
+      sell_unit: "gram" | "box"
       users_roles: "CUSTOMER" | "MANAGER" | "ADMIN"
     }
     CompositeTypes: {
@@ -189,6 +415,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      order_limit_unit: ["box", "gram"],
+      sell_unit: ["gram", "box"],
       users_roles: ["CUSTOMER", "MANAGER", "ADMIN"],
     },
   },

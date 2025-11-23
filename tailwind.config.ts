@@ -1,10 +1,12 @@
 import type { Config } from "tailwindcss";
+import { heroui } from "@heroui/react";
 
 const config: Config = {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./node_modules/@heroui/theme/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {
@@ -28,9 +30,19 @@ const config: Config = {
       boxShadow: {
         'hlb': '0 4px 6px -1px var(--hlb-shadow), 0 2px 4px -1px var(--hlb-shadow)',
       },
+      keyframes: {
+        'fade-in': {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
+      animation: {
+        'fade-in': 'fade-in 0.3s ease-out forwards',
+      },
     },
   },
-  plugins: [],
+  darkMode: "class",
+  plugins: [heroui()],
 };
 
 export default config;

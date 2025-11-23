@@ -39,7 +39,6 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
   const menuItems = [
     { key: 'home', label: t('home'), href: '#home' },
     { key: 'menu', label: t('menu'), href: '#menu' },
-    { key: 'about', label: t('about'), href: '#about' },
     { key: 'contact', label: t('contact'), href: '#contact' },
   ];
 
@@ -52,9 +51,9 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
     >
       <NavbarContent>
         <NavbarBrand>
-          <div className="flex flex-col">
-            <h1 className="text-xl md:text-2xl font-bold">{t('title')}</h1>
-          </div>
+          <Link href="/" className="flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-md">
+            <h1 className="text-xl md:text-2xl font-bold text-white">{t('title')}</h1>
+          </Link>
         </NavbarBrand>
       </NavbarContent>
 
