@@ -5,16 +5,16 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Lebanese Sweets Shop Color Palette */
-  --hlb-primary: #0B2F64;      /* Dark blue for headers, buttons */
-  --hlb-gold: #D8B64C;         /* Gold for prices, accents */
-  --hlb-bg: #FFFFFF;           /* White background */
-  --hlb-text: #0B2F64;         /* Dark blue text */
-  --hlb-text-light: #6B7280;   /* Light gray for descriptions */
-  --hlb-available: #3B82F6;    /* Light blue for "Available Today" */
-  --hlb-order-tomorrow: #F59E0B; /* Light gold for "Order Tomorrow" */
-  --hlb-card-bg: #FFFFFF;      /* White for cards */
-  --hlb-shadow: rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  /* ZEWEDE brand palette */
+  --hlb-primary: #C58554;         /* Brand caramel */
+  --hlb-gold: #C26E28;            /* Accent orange */
+  --hlb-bg: #FFF1E6;              /* Cream background */
+  --hlb-text: #331D16;            /* Dark cocoa */
+  --hlb-text-light: #425542;      /* Muted green-gray */
+  --hlb-available: #425542;       /* Availability */
+  --hlb-order-tomorrow: #4A5C81;  /* Secondary */
+  --hlb-card-bg: #FFFFFF;         /* Card surface */
+  --hlb-shadow: rgba(51, 29, 22, 0.14); /* Warm shadow */
   
   /* Font variables */
   --font-montserrat: var(--font-montserrat);

@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 
-import type { MenuItemPriceRowType, MenuItemRowType } from '@/types/derived';
+import type { MenuItemRowType, MenuItemSizeRowType, MenuItemSizeTranslationRowType } from '@/types/derived';
 import type { Database } from '@/types/supabase';
 
 type SupabaseServerClient = SupabaseClient<Database>;
@@ -16,9 +16,13 @@ type CategoryTranslation = {
   name: string; 
 };
 
+type SizeWithTranslations = MenuItemSizeRowType & {
+  menu_item_size_translations?: MenuItemSizeTranslationRowType[];
+};
+
 type MenuItemQueryResult = MenuItemRowType & {
   menu_items_translations?: Translation[];
-  menu_item_price?: Pick<MenuItemPriceRowType, 'count' | 'price' | 'type'>[];
+  menu_item_sizes?: SizeWithTranslations[];
   category?: {
     id: string;
     name: string;
@@ -31,7 +35,10 @@ export type PublicMenuItem = {
   name: string;
   description: string | null;
   availability: MenuItemRowType['availability'];
-  priceLabel: string | null;
+  sizes: Array<{
+    name: string;
+    price: number;
+  }>;
   imageKey: MenuItemRowType['image_key'];
   categoryName: string | null;
   categoryId: string | null;
@@ -57,7 +64,12 @@ export async function getPublicMenuItems({
       availability,
       image_key,
       menu_items_translations(locale, name, description),
-      menu_item_price(count, price, type),
+      menu_item_sizes(
+        id,
+        price,
+        is_active,
+        menu_item_size_translations(locale, name)
+      ),
       category:categories(
         id,
         name,
@@ -67,7 +79,7 @@ export async function getPublicMenuItems({
     .eq('is_active', true)
     .limit(limit);
 
-  const typedItems = (data ?? []) as MenuItemQueryResult[];
+  const typedItems = (data ?? []) as unknown as MenuItemQueryResult[];
 
   return typedItems.map((item) => {
     const itemTranslation =
@@ -80,17 +92,24 @@ export async function getPublicMenuItems({
         ? item.category?.categories_translations?.find((translation) => translation.locale === 'ar')
         : undefined;
 
-    const firstPrice = item.menu_item_price?.[0];
-    const priceLabel = firstPrice
-      ? `${firstPrice.count} ${firstPrice.type} • ${firstPrice.price} USD`
-      : null;
+    const sizes = (item.menu_item_sizes ?? [])
+      .filter((size) => size.is_active)
+      .map((size) => {
+        const sizeTranslation = size.menu_item_size_translations?.find(
+          (t) => t.locale === locale
+        ) ?? size.menu_item_size_translations?.find((t) => t.locale === 'en');
+        return {
+          name: sizeTranslation?.name ?? '',
+          price: size.price,
+        };
+      });
 
     return {
       id: item.id,
       name: itemTranslation?.name ?? item.name,
       description: itemTranslation?.description ?? item.description,
       availability: item.availability,
-      priceLabel,
+      sizes,
       imageKey: item.image_key,
       categoryName: categoryTranslation?.name ?? item.category?.name ?? null,
       categoryId: item.category?.id ?? null,

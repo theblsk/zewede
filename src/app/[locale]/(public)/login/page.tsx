@@ -13,7 +13,7 @@ import { authenticate } from './actions'
 
 export default function LoginPage() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center bg-gradient-to-br from-[#fef8ee] via-white to-[#f4d9a4]/30 px-6 py-16">
+    <section className="relative flex min-h-screen items-center justify-center bg-linear-to-br from-[#fef8ee] via-white to-[#f4d9a4]/30 px-6 py-16">
       <form action={authenticate} className="w-full max-w-md">
         <Card className="border border-default-100/60 shadow-large">
           <CardHeader className="flex flex-col items-center gap-2 text-center">

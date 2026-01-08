@@ -26,7 +26,16 @@ export const getDashboardData = async (): Promise<DashboardData> => {
     .select(
       `id, name, is_active, description,
        categories_translations(locale, name, description),
-       menu_items(*, menu_item_price(*), menu_items_translations(locale, name, description))`
+       menu_items(
+         *,
+         menu_item_sizes(
+           id,
+           price,
+           is_active,
+           menu_item_size_translations(locale, name)
+         ),
+         menu_items_translations(locale, name, description)
+       )`
     )
     .order('name', { ascending: true });
 
@@ -72,7 +81,12 @@ export const getMenuItemById = async (itemId: string): Promise<MenuItemWithRelat
     .select(
       `*, 
        category:categories(id, name),
-       menu_item_price(*), 
+       menu_item_sizes(
+         id,
+         price,
+         is_active,
+         menu_item_size_translations(locale, name)
+       ),
        menu_items_translations(locale, name, description)`
     )
     .eq('id', itemId)

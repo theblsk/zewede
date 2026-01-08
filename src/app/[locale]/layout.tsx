@@ -3,7 +3,7 @@ import { Montserrat, Amiri } from "next/font/google";
 import "./globals.css";
 import { HeroUIProvider } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -19,11 +19,28 @@ const amiri = Amiri({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Refaat Al Hallab - Authentic Lebanese Sweets Since 1881",
-  description:
-    "Discover our exquisite collection of authentic Lebanese sweets, crafted with love and tradition passed down through generations.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
+  const t = await getTranslations({ locale, namespace: "metadata" });
+
+  return {
+    title: {
+      default: t("title"),
+      template: `%s | ${t("title")}`,
+    },
+    description: t("description"),
+    manifest: "/site.webmanifest",
+    themeColor: "#C58554",
+    icons: {
+      icon: [
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon.ico" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png" }],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,

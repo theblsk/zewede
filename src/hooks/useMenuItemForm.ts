@@ -59,13 +59,16 @@ export function getCreateMenuItemDefaultValues(): MenuItemFormValues {
     description: "",
     description_ar: "",
     image_key: "",
-    max_order_limit_unit: undefined,
-    max_order_limit_value: undefined,
     availability: true,
     is_active: true,
-    price_type: "gram",
-    price_count: "1",
-    price_amount: "0",
+    sizes: [
+      {
+        name: "",
+        name_ar: "",
+        price: "0",
+        is_active: true,
+      },
+    ],
   };
 }
 
@@ -81,12 +84,37 @@ export function menuItemToFormValues(item: {
   image_key: string | null;
   availability: boolean;
   is_active: boolean;
-  max_order_limit_unit?: "box" | "gram" | null;
-  max_order_limit_value?: number | null;
-  price_type?: "gram" | "box";
-  price_count?: number;
-  price_amount?: number;
+  menu_item_sizes?: Array<{
+    id: string;
+    price: number;
+    is_active: boolean;
+    menu_item_size_translations?: Array<{
+      locale: string;
+      name: string;
+    }>;
+  }>;
 }): MenuItemFormValues {
+  const sizes = item.menu_item_sizes && item.menu_item_sizes.length > 0
+    ? item.menu_item_sizes.map((size) => {
+        const enTranslation = size.menu_item_size_translations?.find((t) => t.locale === "en");
+        const arTranslation = size.menu_item_size_translations?.find((t) => t.locale === "ar");
+        return {
+          id: size.id,
+          name: enTranslation?.name ?? "",
+          name_ar: arTranslation?.name ?? "",
+          price: String(size.price),
+          is_active: size.is_active,
+        };
+      })
+    : [
+        {
+          name: "",
+          name_ar: "",
+          price: "0",
+          is_active: true,
+        },
+      ];
+
   return {
     category_id: item.category_id ?? "",
     name: item.name ?? "",
@@ -94,15 +122,9 @@ export function menuItemToFormValues(item: {
     description: item.description ?? "",
     description_ar: item.description_ar ?? "",
     image_key: item.image_key ?? "",
-    max_order_limit_unit: item.max_order_limit_unit ?? undefined,
-    max_order_limit_value: item.max_order_limit_value
-      ? String(item.max_order_limit_value)
-      : undefined,
     availability: item.availability ?? true,
     is_active: item.is_active ?? true,
-    price_type: item.price_type ?? "gram",
-    price_count: String(item.price_count ?? 1),
-    price_amount: String(item.price_amount ?? 0),
+    sizes,
   };
 }
 

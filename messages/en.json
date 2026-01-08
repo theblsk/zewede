@@ -1,6 +1,8 @@
 {
   "navbar": {
-    "title": "Refaat Al Hallab",
+    "title": "ZEWEDE",
+    "tagline": "Lebanese Traditional Bakery",
+    "logoAlt": "ZEWEDE logo",
     "home": "Home",
     "menu": "Menu",
     "about": "About",
@@ -10,16 +12,20 @@
     "logout": "Logout"
   },
   "hero": {
-    "subtitle": "The Refaat Hallab branch in Kalamoun",
-    "title": "Taste the Tradition of Lebanon",
-    "description": "Discover our exquisite collection of authentic Lebanese sweets, crafted with love and tradition passed down through generations.",
-    "cta": "Explore Our Menu",
-    "since": "Since 1881",
-    "traditional": "Traditional Recipe"
+    "badge": "Baked fresh daily",
+    "subtitle": "Traditional flavors, stone-baked with love",
+    "title": "ZEWEDE",
+    "description": "Experience the authentic taste of handcrafted Manoushe, specialty Pizzas, and savory pastries. Freshly prepared using the finest ingredients.",
+    "cta": "View the Menu",
+    "imageAlt": "Freshly baked manoushe and pizza"
+  },
+  "metadata": {
+    "title": "ZEWEDE",
+    "description": "Lebanese Traditional Bakery and Savory Pastries."
   },
   "menu": {
-    "title": "Our Delicious Menu",
-    "subtitle": "Handcrafted Lebanese sweets made with the finest ingredients",
+    "title": "Our Bakery Menu",
+    "subtitle": "Handcrafted Manoushe, Pizza, and Pastries baked to perfection",
     "all": "All",
     "availableToday": "Available Today",
     "orderTomorrow": "Order Tomorrow",
@@ -29,18 +35,18 @@
     "title": "Contact Us",
     "subtitle": "Get in touch with us for orders and inquiries",
     "phone": "Phone",
-    "phoneNumber": "+961 71 600 153",
+    "phoneNumber": "+961 81 484 472",
     "callNow": "Call Now",
     "location": "Location",
-    "address": "The Refaat Hallab branch in Kalamoun",
-    "city": "Kalamoun, Lebanon",
+    "address": "Kalamoun - Cafes Square - Opposite Abu Tammam Library",
+    "city": "Lebanon",
     "hours": "Opening Hours",
-    "schedule": "Daily: 8:00 AM - 10:00 PM",
+    "schedule": "7:30 AM - 2:30 PM, 6:00 PM - 10:00 PM",
     "status": "Open Every Day"
   },
   "footer": {
-    "title": "Refaat Al Hallab - The Refaat Hallab branch in Kalamoun",
-    "subtitle": "Authentic Lebanese Sweets Since 1881",
+    "title": "ZEWEDE - Lebanese Traditional Bakery",
+    "subtitle": "The authentic taste of Lebanon in every bite.",
     "callNow": "Call Now"
   },
   "dashboard": {
@@ -114,6 +120,13 @@
           "confirm": "Disable",
           "cancel": "Cancel"
         }
+      },
+      "ariaLabels": {
+        "search": "Search categories",
+        "edit": "Edit category",
+        "delete": "Delete category",
+        "enable": "Enable category",
+        "disable": "Disable category"
       }
     },
     "items": {
@@ -149,7 +162,13 @@
         "maxOrderLimitValue": "Max Order Limit Value (Optional)",
         "available": "Available",
         "active": "Active",
-        "image": "Image"
+        "image": "Image",
+        "sizes": "Sizes",
+        "addSize": "Add Size",
+        "size": "Size",
+        "sizeName": "Size Name",
+        "sizeNameAr": "Size Name (Arabic)",
+        "price": "Price (USD)"
       },
       "search": {
         "placeholder": "Search menu items"

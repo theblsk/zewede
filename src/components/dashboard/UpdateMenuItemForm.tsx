@@ -22,11 +22,15 @@ type MenuItemData = {
   image_key: string | null;
   availability: boolean;
   is_active: boolean;
-  max_order_limit_unit?: "box" | "gram" | null;
-  max_order_limit_value?: number | null;
-  price_type?: "gram" | "box";
-  price_count?: number;
-  price_amount?: number;
+  menu_item_sizes?: Array<{
+    id: string;
+    price: number;
+    is_active: boolean;
+    menu_item_size_translations?: Array<{
+      locale: string;
+      name: string;
+    }>;
+  }>;
 };
 
 export type UpdateMenuItemFormProps = {

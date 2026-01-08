@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from 'react';
 
-import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { AnimatePresence, motion } from 'framer-motion';
 import Image from "next/image";
@@ -19,7 +18,10 @@ type MenuGridItem = {
   name: string;
   description: string | null;
   availability: boolean;
-  priceLabel: string | null;
+  sizes: Array<{
+    name: string;
+    price: number;
+  }>;
   imageKey: string | null;
   categoryName: string | null;
   categoryId: string | null;
@@ -132,7 +134,7 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
                   exit={{ opacity: 0, x: isRTL ? -20 : 20 }}
                   transition={{ duration: 0.35, delay: index * itemStagger }}
                 >
-                  <Card className="bg-hlb-card-bg shadow-hlb rounded-xl overflow-hidden" dir="ltr">
+                  <Card className="bg-hlb-card-bg shadow-hlb rounded-xl overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
                     <div className="relative">
                       {imageUrl ? (
                         <div className="w-full h-48 relative">
@@ -145,13 +147,13 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-48 bg-hlb-gold/20 flex items-center justify-center">
-                          <span className="text-hlb-gold text-6xl">🥮</span>
+                        <div className="w-full h-48 bg-hlb-gold/10 flex items-center justify-center">
+                          <span className="text-hlb-gold text-6xl">🍕</span>
                         </div>
                       )}
 
                       {/* Availability tag */}
-                      <div className="absolute top-3 right-3">
+                      <div className={`absolute top-3 ${isRTL ? 'left-3' : 'right-3'}`}>
                         <span
                           className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
                             item.availability
@@ -165,32 +167,46 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
                     </div>
 
                     <CardBody className="p-6">
-                      <h3 className="text-xl font-bold text-hlb-primary mb-2">
+                      <h3 className={`text-xl font-bold text-hlb-primary mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
                         {item.name}
                       </h3>
 
                       {item.categoryName && (
-                        <p className="text-xs uppercase tracking-wide text-hlb-gold mb-2">
+                        <p className={`text-xs uppercase tracking-wide text-hlb-gold mb-2 ${isRTL ? 'text-right' : 'text-left'}`}>
                           {item.categoryName}
                         </p>
                       )}
 
                       {item.description && (
-                        <p className="text-hlb-text-light text-sm mb-4 leading-relaxed">
+                        <p className={`text-hlb-text-light text-sm mb-4 leading-relaxed ${isRTL ? 'text-right' : 'text-left'}`}>
                           {item.description}
                         </p>
                       )}
 
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-hlb-primary">
-                          {item.priceLabel ?? '—'}
-                        </span>
-                        <Button
-                          size="sm"
-                          className="bg-hlb-primary text-white hover:bg-hlb-primary/90 font-semibold"
-                        >
-                          {t('addToOrder')}
-                        </Button>
+                      <div className="flex flex-col gap-2">
+                        {item.sizes.length > 0 ? (
+                          <div className={`flex flex-wrap gap-2 ${isRTL ? 'justify-end' : 'justify-start'}`}>
+                            {item.sizes.map((size, idx) => (
+                              <span
+                                key={idx}
+                                className={`text-sm font-medium text-hlb-primary px-2 py-1 bg-hlb-primary/10 rounded ${isRTL ? 'text-right' : 'text-left'}`}
+                                dir={isRTL ? 'rtl' : 'ltr'}
+                              >
+                                {isRTL ? (
+                                  <>
+                                    ${size.price}: {size.name}
+                                  </>
+                                ) : (
+                                  <>
+                                    {size.name}: ${size.price}
+                                  </>
+                                )}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-sm text-hlb-text-light">—</span>
+                        )}
                       </div>
                     </CardBody>
                   </Card>

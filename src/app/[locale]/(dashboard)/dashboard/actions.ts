@@ -709,12 +709,13 @@ export const createMenuItemFromValues = async (
     description: input.description,
     availability: input.availability,
     isActive: input.is_active,
-    maxOrderLimitUnit: input.max_order_limit_unit,
-    maxOrderLimitValue: input.max_order_limit_value ? String(input.max_order_limit_value) : undefined,
     imageKey: input.image_key,
-    priceType: input.price_type,
-    priceCount: String(input.price_count),
-    priceAmount: String(input.price_amount),
+    sizes: input.sizes.map((size) => ({
+      name: size.name,
+      nameAr: size.name_ar,
+      price: String(size.price),
+      isActive: size.is_active,
+    })),
   });
 
   if (!parsed.success) {
@@ -741,27 +742,41 @@ export const createMenuItemFromValues = async (
     return { ok: false, message: error.message };
   }
 
-  // Insert max order limit if provided
-  if (createdItem?.id && parsed.data.maxOrderLimitUnit && parsed.data.maxOrderLimitValue) {
-    const limitPayload: MenuItemMaxOrderLimitInsertType = {
-      menu_item_id: createdItem.id,
-      unit: parsed.data.maxOrderLimitUnit,
-      limit_value: parsed.data.maxOrderLimitValue,
-    };
-    await supabase.from('menu_item_max_order_limits').upsert(limitPayload, {
-      onConflict: 'menu_item_id,unit',
-    });
-  }
-
-  // Insert price
+  // Insert sizes and their translations
   if (createdItem?.id) {
-    const pricePayload: MenuItemPriceInsertType = {
-      menu_item_id: createdItem.id,
-      type: parsed.data.priceType,
-      count: parsed.data.priceCount,
-      price: parsed.data.priceAmount,
-    };
-    await supabase.from('menu_item_price').insert(pricePayload);
+    for (const size of parsed.data.sizes) {
+      const { data: createdSize, error: sizeError } = await supabase
+        .from('menu_item_sizes')
+        .insert({
+          menu_item_id: createdItem.id,
+          price: size.price,
+          is_active: size.isActive,
+        })
+        .select('id')
+        .maybeSingle();
+
+      if (sizeError) {
+        return { ok: false, message: `Failed to create size: ${sizeError.message}` };
+      }
+
+      if (createdSize?.id) {
+        // Insert English translation (name is required)
+        await supabase.from('menu_item_size_translations').insert({
+          menu_item_size_id: createdSize.id,
+          locale: 'en',
+          name: size.name,
+        });
+
+        // Insert Arabic translation if provided
+        if (size.nameAr && size.nameAr.trim().length > 0) {
+          await supabase.from('menu_item_size_translations').insert({
+            menu_item_size_id: createdSize.id,
+            locale: 'ar',
+            name: size.nameAr.trim(),
+          });
+        }
+      }
+    }
   }
 
   // Optional Arabic translation upsert
@@ -799,12 +814,14 @@ export const updateMenuItemFromValues = async (
     description: input.description,
     availability: input.availability,
     isActive: input.is_active,
-    maxOrderLimitUnit: input.max_order_limit_unit,
-    maxOrderLimitValue: input.max_order_limit_value ? String(input.max_order_limit_value) : undefined,
     imageKey: input.image_key,
-    priceType: input.price_type,
-    priceCount: String(input.price_count),
-    priceAmount: String(input.price_amount),
+    sizes: input.sizes.map((size) => ({
+      id: size.id,
+      name: size.name,
+      nameAr: size.name_ar,
+      price: String(size.price),
+      isActive: size.is_active,
+    })),
   });
 
   if (!parsed.success) {
@@ -830,28 +847,54 @@ export const updateMenuItemFromValues = async (
     return { ok: false, message: error.message };
   }
 
-  // Upsert max order limit if provided
-  if (parsed.data.maxOrderLimitUnit && parsed.data.maxOrderLimitValue) {
-    const limitPayload: MenuItemMaxOrderLimitInsertType = {
-      menu_item_id: itemId,
-      unit: parsed.data.maxOrderLimitUnit,
-      limit_value: parsed.data.maxOrderLimitValue,
-    };
-    await supabase.from('menu_item_max_order_limits').upsert(limitPayload, {
-      onConflict: 'menu_item_id,unit',
-    });
+  // Get existing sizes to delete translations
+  const { data: existingSizes } = await supabase
+    .from('menu_item_sizes')
+    .select('id')
+    .eq('menu_item_id', itemId);
+
+  // Delete all existing sizes (cascade will delete translations)
+  if (existingSizes && existingSizes.length > 0) {
+    await supabase
+      .from('menu_item_sizes')
+      .delete()
+      .eq('menu_item_id', itemId);
   }
 
-  // Upsert price
-  const pricePayload: MenuItemPriceInsertType = {
-    menu_item_id: itemId,
-    type: parsed.data.priceType,
-    count: parsed.data.priceCount,
-    price: parsed.data.priceAmount,
-  };
-  await supabase.from('menu_item_price').upsert(pricePayload, {
-    onConflict: 'menu_item_id,type',
-  });
+  // Insert new sizes and their translations
+  for (const size of parsed.data.sizes) {
+    const { data: createdSize, error: sizeError } = await supabase
+      .from('menu_item_sizes')
+      .insert({
+        menu_item_id: itemId,
+        price: size.price,
+        is_active: size.isActive,
+      })
+      .select('id')
+      .maybeSingle();
+
+    if (sizeError) {
+      return { ok: false, message: `Failed to update size: ${sizeError.message}` };
+    }
+
+    if (createdSize?.id) {
+      // Insert English translation (name is required)
+      await supabase.from('menu_item_size_translations').insert({
+        menu_item_size_id: createdSize.id,
+        locale: 'en',
+        name: size.name,
+      });
+
+      // Insert Arabic translation if provided
+      if (size.nameAr && size.nameAr.trim().length > 0) {
+        await supabase.from('menu_item_size_translations').insert({
+          menu_item_size_id: createdSize.id,
+          locale: 'ar',
+          name: size.nameAr.trim(),
+        });
+      }
+    }
+  }
 
   // Optional Arabic translation upsert
   const nameAr = (input.name_ar ?? '').trim();
@@ -934,14 +977,28 @@ export const getMenuItemsForDashboard = async () => {
     .select(
       `*, 
        category:categories(id, name),
-       menu_item_price(*), 
-       menu_item_max_order_limits(*),
+       menu_item_sizes(
+         id,
+         price,
+         is_active,
+         menu_item_size_translations(locale, name)
+       ), 
        menu_items_translations(locale, name, description)`
     )
     .order('name', { ascending: true });
 
   type Translation = { locale: string; name: string; description: string | null };
-  type ItemWithTranslations = MenuItemRowType & { menu_items_translations?: Translation[] };
+  type SizeTranslation = { locale: string; name: string };
+  type SizeWithTranslations = {
+    id: string;
+    price: number;
+    is_active: boolean;
+    menu_item_size_translations?: SizeTranslation[];
+  };
+  type ItemWithTranslations = MenuItemRowType & {
+    menu_items_translations?: Translation[];
+    menu_item_sizes?: SizeWithTranslations[];
+  };
 
   const items = (itemsData ?? []).map((item: ItemWithTranslations) => {
     const arItem = item.menu_items_translations?.find((t) => t.locale === 'ar');

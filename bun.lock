@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "alhallabkalamoun-new",
+      "name": "zewede",
       "dependencies": {
         "@heroui/button": "^2.2.27",
         "@heroui/navbar": "^2.2.25",

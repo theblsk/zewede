@@ -42,7 +42,7 @@ import {
   toggleMenuItemActive,
   getMenuItemsForDashboard,
 } from "@/app/[locale]/(dashboard)/dashboard/actions";
-import { MenuItemPriceRowType } from "@/types/derived";
+import type { MenuItemSizeRowType, MenuItemSizeTranslationRowType } from "@/types/derived";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
 import { LoadingOverlay } from "@/components/LoadingOverlay";
 
@@ -61,17 +61,16 @@ type ToggleConfirmation = {
   isCurrentlyActive: boolean;
 } | null;
 
-const mapPrice = (price: MenuItemPriceRowType) =>
-  `${price.count} ${price.type} • ${price.price} USD`;
+const mapSize = (size: MenuItemSizeRowType & { menu_item_size_translations?: MenuItemSizeTranslationRowType[] }) => {
+  const enName = size.menu_item_size_translations?.find((t) => t.locale === "en")?.name ?? "";
+  return `${enName}: ${size.price} USD`;
+};
 
 export function MenuItemsTable({ locale }: MenuItemsTableProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
-  const [priceTypeFilter, setPriceTypeFilter] = useState<Set<string>>(
-    new Set()
-  );
   const [availabilityFilter, setAvailabilityFilter] = useState<Set<string>>(
     new Set()
   );
@@ -113,10 +112,6 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
       (item.description ?? "").toLowerCase().includes(q) ||
       (item.description_ar ?? "").toLowerCase().includes(q);
 
-    const matchesPriceType =
-      priceTypeFilter.size === 0 ||
-      (item.menu_item_price ?? []).some((p) => priceTypeFilter.has(p.type));
-
     const matchesAvailability = (() => {
       const allSelected =
         availabilityFilter.has("available") &&
@@ -135,7 +130,7 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
     })();
 
     return (
-      matchesQuery && matchesPriceType && matchesAvailability && matchesActive
+      matchesQuery && matchesAvailability && matchesActive
     );
   });
 
@@ -218,18 +213,6 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
               <div className="p-3 w-[280px] space-y-3">
                 <Select
                   selectionMode="multiple"
-                  label={t("filters.priceUnit")}
-                  placeholder={t("filters.all")}
-                  selectedKeys={priceTypeFilter}
-                  onSelectionChange={(keys) =>
-                    setPriceTypeFilter(new Set(keys as Set<string>))
-                  }
-                >
-                  <SelectItem key="gram">{t("filters.gram")}</SelectItem>
-                  <SelectItem key="box">{t("filters.box")}</SelectItem>
-                </Select>
-                <Select
-                  selectionMode="multiple"
                   label={t("filters.availability")}
                   placeholder={t("filters.all")}
                   selectedKeys={availabilityFilter}
@@ -257,7 +240,6 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                     size="sm"
                     variant="light"
                     onPress={() => {
-                      setPriceTypeFilter(new Set());
                       setAvailabilityFilter(new Set());
                       setActiveStatusFilter(new Set());
                     }}
@@ -350,11 +332,17 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
-                        {item.menu_item_price?.map((price) => (
-                          <Chip key={price.id} size="sm" variant="flat">
-                            {mapPrice(price)}
-                          </Chip>
-                        )) ?? "—"}
+                        {item.menu_item_sizes && item.menu_item_sizes.length > 0 ? (
+                          item.menu_item_sizes
+                            .filter((size) => size.is_active)
+                            .map((size) => (
+                              <Chip key={size.id} size="sm" variant="flat">
+                                {mapSize(size)}
+                              </Chip>
+                            ))
+                        ) : (
+                          "—"
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>

@@ -31,8 +31,12 @@ export default async function EditMenuItemPage({ params }: { params: Promise<{ i
     .select(
       `*, 
        category:categories(id, name),
-       menu_item_price(*), 
-       menu_item_max_order_limits(*),
+       menu_item_sizes(
+         id,
+         price,
+         is_active,
+         menu_item_size_translations(locale, name)
+       ),
        menu_items_translations(locale, name, description)`
     )
     .eq('id', id)
@@ -43,14 +47,21 @@ export default async function EditMenuItemPage({ params }: { params: Promise<{ i
   }
 
   type Translation = { locale: string; name: string; description: string | null };
-  type ItemWithTranslations = typeof itemData & { menu_items_translations?: Translation[] };
+  type SizeTranslation = { locale: string; name: string };
+  type SizeWithTranslations = {
+    id: string;
+    price: number;
+    is_active: boolean;
+    menu_item_size_translations?: SizeTranslation[];
+  };
+  type ItemWithTranslations = typeof itemData & {
+    menu_items_translations?: Translation[];
+    menu_item_sizes?: SizeWithTranslations[];
+  };
 
   const arItem = (itemData as unknown as ItemWithTranslations).menu_items_translations?.find(
     (translation: Translation) => translation.locale === 'ar'
   );
-
-  const firstPrice = itemData.menu_item_price?.[0];
-  const firstLimit = itemData.menu_item_max_order_limits?.[0];
 
   const item = {
     id: itemData.id,
@@ -62,11 +73,7 @@ export default async function EditMenuItemPage({ params }: { params: Promise<{ i
     image_key: itemData.image_key,
     availability: itemData.availability,
     is_active: itemData.is_active,
-    max_order_limit_unit: firstLimit?.unit ?? null,
-    max_order_limit_value: firstLimit?.limit_value ?? null,
-    price_type: firstPrice?.type ?? ('gram' as 'gram' | 'box'),
-    price_count: firstPrice?.count ?? null,
-    price_amount: firstPrice?.price ?? null,
+    menu_item_sizes: (itemData as unknown as ItemWithTranslations).menu_item_sizes ?? [],
   };
 
   return (

@@ -12,10 +12,10 @@ import {
 import { Button } from "@heroui/button";
 import { Globe } from "lucide-react";
 import { useLocale, useTranslations } from 'next-intl';
-import { usePathname, useRouter } from '@/i18n/navigation';
+import { Link, usePathname, useRouter } from '@/i18n/navigation';
 import { useState } from 'react';
-import { Link } from "@heroui/react";
 import { logout } from "@/app/[locale]/(public)/login/actions";
+import Image from "next/image";
 
 type PublicNavbarProps = {
   showDashboardLink?: boolean;
@@ -51,8 +51,22 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
     >
       <NavbarContent>
         <NavbarBrand>
-          <Link href="/" className="flex flex-col focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-md">
-            <h1 className="text-xl md:text-2xl font-bold text-white">{t('title')}</h1>
+          <Link
+            href={`/`}
+            className="flex items-center gap-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60 rounded-md"
+          >
+            <Image
+              src="/logo.avif"
+              alt={t('logoAlt')}
+              width={44}
+              height={44}
+              priority
+              className="rounded-full bg-white/10 p-1"
+            />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xl md:text-2xl font-bold text-white tracking-tight">{t('title')}</span>
+              <span className="text-xs md:text-sm text-white/80">{t('tagline')}</span>
+            </div>
           </Link>
         </NavbarBrand>
       </NavbarContent>
@@ -60,12 +74,9 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {menuItems.map((item) => (
           <NavbarItem key={item.key}>
-            <Link
-              href={item.href}
-              className="text-white hover:text-hlb-gold transition-colors"
-            >
+            <a href={item.href} className="text-white hover:text-hlb-bg transition-colors">
               {item.label}
-            </Link>
+            </a>
           </NavbarItem>
         ))}
       </NavbarContent>
@@ -75,8 +86,8 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
         {showDashboardLink && (
           <NavbarItem className="hidden sm:block">
             <Link
-              href={`/${locale}/dashboard`}
-              className="text-white hover:text-hlb-gold transition-colors"
+              href={`/dashboard`}
+              className="text-white hover:text-hlb-bg transition-colors"
             >
               {t('dashboard')}
             </Link>
@@ -102,10 +113,9 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
             <Button
               as={Link}
               href={`/${locale}/login`}
-              color="warning"
               variant="solid"
               size="sm"
-              className="font-semibold"
+              className="font-semibold bg-hlb-bg text-hlb-text hover:bg-hlb-bg/90"
             >
               {t('login')}
             </Button>
@@ -117,7 +127,7 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
             variant="light"
             size="sm"
             onPress={handleLanguageSwitch}
-            className="text-white hover:text-hlb-gold min-w-0 px-2"
+            className="text-white hover:text-hlb-bg min-w-0 px-2"
           >
             <Globe color="white" size={20} />
           </Button>
@@ -132,13 +142,13 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
       <NavbarMenu className="bg-hlb-primary">
         {menuItems.map((item) => (
           <NavbarMenuItem key={item.key}>
-            <Link
+            <a
               href={item.href}
-              className="w-full text-white hover:text-hlb-gold transition-colors py-2"
+              className="w-full text-white hover:text-hlb-bg transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               {item.label}
-            </Link>
+            </a>
           </NavbarMenuItem>
         ))}
         
@@ -146,8 +156,8 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
         {showDashboardLink && (
           <NavbarMenuItem key="dashboard">
             <Link
-              href={`/${locale}/dashboard`}
-              className="w-full text-white hover:text-hlb-gold transition-colors py-2"
+              href={`/dashboard`}
+              className="w-full text-white hover:text-hlb-bg transition-colors py-2"
               onClick={() => setIsMenuOpen(false)}
             >
               {t('dashboard')}
@@ -177,11 +187,10 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
             <Button
               as={Link}
               href={`/${locale}/login`}
-              color="warning"
               variant="solid"
               size="sm"
-              className="w-full font-semibold"
-              onClick={() => setIsMenuOpen(false)}
+              className="w-full font-semibold bg-hlb-bg text-hlb-text hover:bg-hlb-bg/90"
+              onPress={() => setIsMenuOpen(false)}
             >
               {t('login')}
             </Button>
