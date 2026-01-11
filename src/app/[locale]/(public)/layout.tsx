@@ -1,4 +1,5 @@
 import PublicNavbar from '@/components/Navbar';
+import { LanguagePreferencePrompt } from '@/components/LanguagePreferencePrompt';
 import { checkUserOnboarded } from '@/utils/auth.utils';
 
 export default async function PublicLayout({
@@ -12,6 +13,7 @@ export default async function PublicLayout({
   return (
     <>
       <PublicNavbar showDashboardLink={showDashboardLink} isLoggedIn={isLoggedIn} />
+      <LanguagePreferencePrompt />
       {children}
     </>
   );

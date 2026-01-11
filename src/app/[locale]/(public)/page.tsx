@@ -46,7 +46,6 @@ export default async function Home() {
   const menuItems = await getPublicMenuItems({
     supabase,
     locale,
-    limit: 9,
   });
 
   return (

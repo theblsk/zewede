@@ -19,6 +19,14 @@
     "cta": "View the Menu",
     "imageAlt": "Freshly baked manoushe and pizza"
   },
+  "languageSelector": {
+    "titleAr": "اختر لغتك",
+    "titleEn": "Choose your language",
+    "descriptionAr": "اختر لغتك المفضلة لتحصل على تجربة أفضل.",
+    "descriptionEn": "Select your preferred language for a better experience.",
+    "english": "Continue in English",
+    "arabic": "تابع بالعربية"
+  },
   "metadata": {
     "title": "ZEWEDE",
     "description": "Lebanese Traditional Bakery and Savory Pastries."

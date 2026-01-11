@@ -53,9 +53,9 @@ type GetPublicMenuItemsArgs = {
 export async function getPublicMenuItems({
   supabase,
   locale,
-  limit = 9,
+  limit,
 }: GetPublicMenuItemsArgs): Promise<PublicMenuItem[]> {
-  const { data } = await supabase
+  const baseQuery = supabase
     .from('menu_items')
     .select(`
       id,
@@ -76,8 +76,10 @@ export async function getPublicMenuItems({
         categories_translations(locale, name)
       )
     `)
-    .eq('is_active', true)
-    .limit(limit);
+    .eq('is_active', true);
+
+  const query = typeof limit === 'number' ? baseQuery.limit(limit) : baseQuery;
+  const { data } = await query;
 
   const typedItems = (data ?? []) as unknown as MenuItemQueryResult[];
 
