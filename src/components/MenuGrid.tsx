@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 
 import { Card, CardBody } from "@heroui/card";
 import { AnimatePresence, motion } from 'framer-motion';
+import { Wheat } from 'lucide-react';
 import Image from "next/image";
 import { useLocale, useTranslations } from 'next-intl';
 import { getImageUrl } from '@/utils/image-upload';
@@ -147,8 +148,13 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
                           />
                         </div>
                       ) : (
-                        <div className="w-full h-48 bg-hlb-gold/10 flex items-center justify-center">
-                          <span className="text-hlb-gold text-6xl">🍕</span>
+                        <div className="w-full h-48 bg-hlb-gold/5 flex items-center justify-center">
+                          <Wheat
+                            className="text-hlb-gold/40"
+                            size={48}
+                            strokeWidth={1.5}
+                            aria-label={t('noImage')}
+                          />
                         </div>
                       )}
 
@@ -194,11 +200,11 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
                               >
                                 {isRTL ? (
                                   <>
-                                    ${size.price}: {size.name}
+                                    {size.name}: {Number(size.price).toLocaleString()} LBP
                                   </>
                                 ) : (
                                   <>
-                                    {size.name}: ${size.price}
+                                    {size.name}: {Number(size.price).toLocaleString()} LBP
                                   </>
                                 )}
                               </span>

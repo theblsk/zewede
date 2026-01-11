@@ -29,7 +29,8 @@
     "all": "All",
     "availableToday": "Available Today",
     "orderTomorrow": "Order Tomorrow",
-    "addToOrder": "Add to Order"
+    "addToOrder": "Add to Order",
+    "noImage": "No image available"
   },
   "contact": {
     "title": "Contact Us",
@@ -156,7 +157,7 @@
         "gram": "Gram",
         "box": "Box",
         "priceCount": "Price Count",
-        "priceAmount": "Price Amount (USD)",
+        "priceAmount": "Price Amount (LBP)",
         "maxOrderLimitUnit": "Max Order Limit Unit (Optional)",
         "selectUnit": "Select unit",
         "maxOrderLimitValue": "Max Order Limit Value (Optional)",
@@ -168,7 +169,7 @@
         "size": "Size",
         "sizeName": "Size Name",
         "sizeNameAr": "Size Name (Arabic)",
-        "price": "Price (USD)"
+        "price": "Price (LBP)"
       },
       "search": {
         "placeholder": "Search menu items"

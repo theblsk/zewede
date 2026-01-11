@@ -30,6 +30,7 @@ import {
   Search,
   Trash2,
   Filter,
+  Wheat,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -63,7 +64,7 @@ type ToggleConfirmation = {
 
 const mapSize = (size: MenuItemSizeRowType & { menu_item_size_translations?: MenuItemSizeTranslationRowType[] }) => {
   const enName = size.menu_item_size_translations?.find((t) => t.locale === "en")?.name ?? "";
-  return `${enName}: ${size.price} USD`;
+  return `${enName}: ${Number(size.price).toLocaleString()} LBP`;
 };
 
 export function MenuItemsTable({ locale }: MenuItemsTableProps) {
@@ -295,9 +296,7 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                         </div>
                       ) : (
                         <div className="w-12 h-12 rounded-lg bg-default-200 flex items-center justify-center">
-                          <span className="text-xs text-default-400">
-                            {t("noImage")}
-                          </span>
+                          <Wheat size={20} className="text-default-400" strokeWidth={1.5} />
                         </div>
                       )}
                     </TableCell>

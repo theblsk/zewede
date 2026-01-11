@@ -112,7 +112,7 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
           <NavbarItem className="hidden sm:block">
             <Button
               as={Link}
-              href={`/${locale}/login`}
+              href={`/login`}
               variant="solid"
               size="sm"
               className="font-semibold bg-hlb-bg text-hlb-text hover:bg-hlb-bg/90"

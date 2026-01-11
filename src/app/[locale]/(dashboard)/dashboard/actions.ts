@@ -3,6 +3,8 @@
 import { revalidatePath } from 'next/cache';
 import { getLocale } from 'next-intl/server';
 
+import { randomUUID } from 'crypto';
+
 import { checkUserOnboarded } from '@/utils/auth.utils';
 import { createClient } from '@/utils/supabase/server';
 
@@ -12,7 +14,6 @@ import {
   CategoryInsertType,
   CategoryUpdateType,
   MenuItemInsertType,
-  MenuItemMaxOrderLimitInsertType,
   MenuItemPriceInsertType,
   MenuItemRowType,
   MenuItemUpdateType,
@@ -110,7 +111,7 @@ const menuItemPriceSchema = z.object({
     .pipe(z.number().int().positive()),
   price: z
     .string()
-    .transform((val) => Number.parseInt(val, 10))
+    .transform((val) => Number(val))
     .pipe(z.number().int().nonnegative()),
 });
 
@@ -742,40 +743,33 @@ export const createMenuItemFromValues = async (
     return { ok: false, message: error.message };
   }
 
-  // Insert sizes and their translations
+  // Insert sizes + translations atomically (avoid N+1)
   if (createdItem?.id) {
-    for (const size of parsed.data.sizes) {
-      const { data: createdSize, error: sizeError } = await supabase
-        .from('menu_item_sizes')
-        .insert({
-          menu_item_id: createdItem.id,
-          price: size.price,
-          is_active: size.isActive,
-        })
-        .select('id')
-        .maybeSingle();
+    const sizesPayload: Array<{
+      id: string;
+      price: number;
+      is_active: boolean;
+      name: string;
+      name_ar: string | null;
+    }> = parsed.data.sizes.map((size) => ({
+      id: randomUUID(),
+      price: size.price,
+      is_active: size.isActive,
+      name: size.name,
+      name_ar:
+        size.nameAr && size.nameAr.trim().length > 0 ? size.nameAr.trim() : null,
+    }));
 
-      if (sizeError) {
-        return { ok: false, message: `Failed to create size: ${sizeError.message}` };
+    const { error: sizesInsertError } = await supabase.rpc(
+      'create_menu_item_sizes_with_translations',
+      {
+        menu_item_id: createdItem.id,
+        sizes: sizesPayload,
       }
+    );
 
-      if (createdSize?.id) {
-        // Insert English translation (name is required)
-        await supabase.from('menu_item_size_translations').insert({
-          menu_item_size_id: createdSize.id,
-          locale: 'en',
-          name: size.name,
-        });
-
-        // Insert Arabic translation if provided
-        if (size.nameAr && size.nameAr.trim().length > 0) {
-          await supabase.from('menu_item_size_translations').insert({
-            menu_item_size_id: createdSize.id,
-            locale: 'ar',
-            name: size.nameAr.trim(),
-          });
-        }
-      }
+    if (sizesInsertError) {
+      return { ok: false, message: sizesInsertError.message };
     }
   }
 

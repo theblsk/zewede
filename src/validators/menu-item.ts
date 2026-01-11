@@ -5,20 +5,20 @@ import { z } from "zod";
  * This schema validates the form input structure
  */
 const menuItemSizeSchema = z.object({
-  id: z.string().optional(), // For updates, to track which size is being edited
+  id: z.uuid().optional(), // For updates, to track which size is being edited
   name: z.string().min(1, "Size name is required"),
   name_ar: z.string().optional(),
   price: z
     .string()
     .default("0")
-    .transform((val) => Number.parseInt(val, 10))
+    .transform((val) => Number(val))
     .pipe(z.number().int().nonnegative()),
   is_active: z.boolean().default(true),
 });
 
 export const menuItemFormSchema = z
   .object({
-    category_id: z.string().uuid("Category is required"),
+    category_id: z.uuid("Category is required"),
     name: z.string().min(1, "Name is required"),
     name_ar: z.string().optional(),
     description: z.string().optional(),
@@ -59,7 +59,7 @@ const menuItemSizeServerSchema = z.object({
   nameAr: z.string().optional(),
   price: z
     .string()
-    .transform((val) => Number.parseInt(val, 10))
+    .transform((val) => Number(val))
     .pipe(z.number().int().nonnegative()),
   isActive: z.boolean(),
 });

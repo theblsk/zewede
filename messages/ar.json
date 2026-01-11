@@ -29,7 +29,8 @@
     "all": "الكل",
     "availableToday": "متوفر اليوم",
     "orderTomorrow": "اطلب للغد",
-    "addToOrder": "أضف للطلب"
+    "addToOrder": "أضف للطلب",
+    "noImage": "لا توجد صورة"
   },
   "contact": {
     "title": "اتصل بنا",
@@ -156,7 +157,7 @@
         "gram": "جرام",
         "box": "صندوق",
         "priceCount": "عدد السعر",
-        "priceAmount": "مبلغ السعر (دولار أمريكي)",
+        "priceAmount": "مبلغ السعر (ليرة لبنانية)",
         "maxOrderLimitUnit": "وحدة الحد الأقصى للطلب (اختياري)",
         "selectUnit": "اختر الوحدة",
         "maxOrderLimitValue": "قيمة الحد الأقصى للطلب (اختياري)",
@@ -168,7 +169,7 @@
         "size": "الحجم",
         "sizeName": "اسم الحجم",
         "sizeNameAr": "اسم الحجم (بالعربية)",
-        "price": "السعر (دولار أمريكي)"
+        "price": "السعر (ليرة لبنانية)"
       },
       "search": {
         "placeholder": "البحث في عناصر القائمة"
