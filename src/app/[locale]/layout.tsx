@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { Montserrat, Amiri } from "next/font/google";
 import "./globals.css";
-import { HeroUIProvider } from "@heroui/react";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { AppProviders } from "@/components/AppProviders";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -48,6 +48,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const locale = await getLocale();
+  const messages = await getMessages();
   const isRTL = locale === "ar";
 
   return (
@@ -57,8 +58,8 @@ export default async function RootLayout({
           isRTL ? "font-amiri" : "font-montserrat"
         } bg-hlb-bg text-hlb-text antialiased`}
       >
-        <NextIntlClientProvider>
-          <HeroUIProvider>{children}</HeroUIProvider>
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <AppProviders>{children}</AppProviders>
         </NextIntlClientProvider>
       </body>
     </html>

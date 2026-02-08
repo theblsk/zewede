@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Button } from '@heroui/button';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -19,24 +19,45 @@ export function LanguagePreferencePrompt() {
   const locale = useLocale();
   const pathname = usePathname();
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
+  const [selectedLocale, setSelectedLocale] = useState<SupportedLocale | null>(null);
+
+  const storedLocale = useSyncExternalStore(
+    (onStoreChange) => {
+      if (typeof window === 'undefined') {
+        return () => {};
+      }
+
+      const onStorage = (event: StorageEvent) => {
+        if (event.key === PREFERENCE_KEY) {
+          onStoreChange();
+        }
+      };
+
+      window.addEventListener('storage', onStorage);
+      return () => window.removeEventListener('storage', onStorage);
+    },
+    () => {
+      if (typeof window === 'undefined') {
+        return null;
+      }
+
+      return localStorage.getItem(PREFERENCE_KEY);
+    },
+    () => null
+  );
+
+  const preferredLocale = selectedLocale ?? storedLocale;
+  const isOpen = !isSupportedLocale(preferredLocale);
 
   useEffect(() => {
-    const stored = localStorage.getItem(PREFERENCE_KEY);
-
-    if (isSupportedLocale(stored)) {
-      if (stored !== locale) {
-        router.replace(pathname, { locale: stored });
-      }
-      return;
+    if (isSupportedLocale(preferredLocale) && preferredLocale !== locale) {
+      router.replace(pathname, { locale: preferredLocale });
     }
-
-    setIsOpen(true);
-  }, [locale, pathname, router]);
+  }, [locale, pathname, preferredLocale, router]);
 
   const handleSelect = (nextLocale: SupportedLocale) => {
+    setSelectedLocale(nextLocale);
     localStorage.setItem(PREFERENCE_KEY, nextLocale);
-    setIsOpen(false);
 
     if (nextLocale !== locale) {
       router.replace(pathname, { locale: nextLocale });
@@ -44,7 +65,7 @@ export function LanguagePreferencePrompt() {
   };
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={setIsOpen} hideCloseButton placement="center">
+    <Modal isOpen={isOpen} onOpenChange={() => {}} hideCloseButton placement="center">
       <ModalContent>
         <div className="p-6 space-y-5">
           <ModalHeader className="pb-0 text-center">
