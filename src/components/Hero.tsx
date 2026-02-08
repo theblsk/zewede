@@ -4,9 +4,20 @@ import { Button } from "@heroui/button";
 import { Chip } from "@heroui/chip";
 import { useTranslations } from 'next-intl';
 import Image from "next/image";
+import { getImageUrl } from '@/utils/image-upload';
+import { DEFAULT_HERO_IMAGE_PATH, LANDING_ASSETS_BUCKET } from '@/utils/site-settings';
 
-export default function Hero() {
+type HeroProps = {
+  heroImageKey: string | null;
+  heroImageBackupKey: string | null;
+};
+
+export default function Hero({ heroImageKey, heroImageBackupKey }: HeroProps) {
   const t = useTranslations('hero');
+  const heroImageSrc =
+    getImageUrl(heroImageKey, LANDING_ASSETS_BUCKET) ??
+    getImageUrl(heroImageBackupKey, LANDING_ASSETS_BUCKET) ??
+    DEFAULT_HERO_IMAGE_PATH;
 
   return (
     <section
@@ -59,7 +70,7 @@ export default function Hero() {
           <div className="absolute -inset-6 bg-[radial-gradient(circle_at_center,rgba(197,133,84,0.30),transparent_65%)]" />
           <div className="relative rounded-3xl overflow-hidden shadow-[0_20px_60px_-30px_rgba(51,29,22,0.55)] border border-hlb-primary/20">
             <Image
-              src="/zaatar.avif"
+              src={heroImageSrc}
               alt={t('imageAlt')}
               width={1200}
               height={900}

@@ -9,6 +9,7 @@ import { DashboardQueryProvider } from './QueryProvider';
 import { CategoriesTable } from './CategoriesTable';
 import { MenuItemsTable } from './MenuItemsTable';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
+import { SettingsPanel } from '@/components/dashboard/SettingsPanel';
 import { TableSkeleton } from '@/components/dashboard/TableSkeleton';
 
 type DashboardTabsProps = {
@@ -26,7 +27,9 @@ export default function DashboardTabs({ locale, translations }: DashboardTabsPro
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('dashboard');
   
-  const urlTab = searchParams.get('tab') === 'menu-items' ? 'menu-items' : 'categories';
+  const tabFromUrl = searchParams.get('tab');
+  const allowedTabs = new Set(['categories', 'menu-items', 'settings']);
+  const urlTab = tabFromUrl && allowedTabs.has(tabFromUrl) ? tabFromUrl : 'categories';
   const [selectedTab, setSelectedTab] = useState(urlTab);
 
   useEffect(() => {
@@ -73,6 +76,15 @@ export default function DashboardTabs({ locale, translations }: DashboardTabsPro
                 <TableSkeleton />
               ) : (
                 <MenuItemsTable locale={locale} />
+              )}
+            </div>
+          </Tab>
+          <Tab key="settings" title={t('settings.title')}>
+            <div className="mt-4">
+              {isPending && selectedTab === 'settings' ? (
+                <TableSkeleton />
+              ) : (
+                <SettingsPanel locale={locale} />
               )}
             </div>
           </Tab>

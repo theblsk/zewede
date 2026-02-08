@@ -7,6 +7,9 @@ export type CategoryUpdateType = Database["public"]["Tables"]["categories"]["Upd
 export type MenuItemRowType = Database["public"]["Tables"]["menu_items"]["Row"];
 export type MenuItemInsertType = Database["public"]["Tables"]["menu_items"]["Insert"];
 export type MenuItemUpdateType = Database["public"]["Tables"]["menu_items"]["Update"];
+export type SiteSettingsRowType = Database["public"]["Tables"]["site_settings"]["Row"];
+export type SiteSettingsInsertType = Database["public"]["Tables"]["site_settings"]["Insert"];
+export type SiteSettingsUpdateType = Database["public"]["Tables"]["site_settings"]["Update"];
 // Legacy types - kept for backward compatibility during migration
 export type MenuItemPriceRowType = Database["public"]["Tables"]["menu_item_price"]["Row"] | undefined;
 export type MenuItemPriceInsertType = Database["public"]["Tables"]["menu_item_price"]["Insert"] | undefined;

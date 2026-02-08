@@ -44,7 +44,6 @@
     "title": "اتصل بنا",
     "subtitle": "تواصل معنا للطلبات والاستفسارات",
     "phone": "الهاتف",
-    "phoneNumber": "+961 81 484 472",
     "callNow": "اتصل الآن",
     "whatsapp": "واتساب",
     "instagram": "إنستغرام",
@@ -52,8 +51,17 @@
     "address": "القلمون - ساحة المقاهي - مقابل مكتبة أبي تمام",
     "city": "لبنان",
     "hours": "ساعات العمل",
-    "schedule": "٧:٣٠ ص - ٢:٣٠ م، ٦:٠٠ م - ١٠:٠٠ م",
-    "status": "مفتوح كل يوم"
+    "statusOpenEveryDay": "مفتوح كل يوم",
+    "statusClosedDays": "مغلق أيام: {days}",
+    "days": {
+      "monday": "الاثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    }
   },
   "footer": {
     "title": "زوّادة - فرن لبناني تقليدي",
@@ -244,6 +252,30 @@
         "enable": "تفعيل عنصر القائمة",
         "disable": "تعطيل عنصر القائمة"
       }
+    },
+    "settings": {
+      "title": "إعدادات الصفحة الرئيسية",
+      "subtitle": "إدارة صورة الهيرو، أرقام التواصل، وساعات العمل للصفحة العامة.",
+      "heroImageLabel": "صورة الهيرو",
+      "heroImageInput": "صورة الهيرو",
+      "heroImageFallbackHint": "الصورة الاحتياطية: {path}",
+      "useBackupImage": "استخدم الصورة الاحتياطية",
+      "callPhoneLabel": "رقم الاتصال",
+      "whatsappPhoneLabel": "رقم واتساب",
+      "openingHoursEnglishLabel": "ساعات العمل (إنجليزي)",
+      "openingHoursArabicLabel": "ساعات العمل (عربي)",
+      "closedDaysLabel": "أيام الإغلاق",
+      "days": {
+        "monday": "الاثنين",
+        "tuesday": "الثلاثاء",
+        "wednesday": "الأربعاء",
+        "thursday": "الخميس",
+        "friday": "الجمعة",
+        "saturday": "السبت",
+        "sunday": "الأحد"
+      },
+      "save": "حفظ الإعدادات",
+      "validationError": "يرجى مراجعة بيانات الإعدادات."
     },
     "search": {
       "placeholder": "البحث في عناصر القائمة",

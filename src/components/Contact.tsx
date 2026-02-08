@@ -4,16 +4,35 @@ import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/card";
 import { Instagram, Phone, MapPin, Clock3, MessageCircle } from "lucide-react";
 import { useLocale, useTranslations } from 'next-intl';
+import type { ClosedDayValue } from '@/utils/site-settings';
 
-export default function Contact() {
+type ContactProps = {
+  callPhoneNumber: string;
+  whatsappPhoneNumber: string;
+  openingHours: string;
+  closedDays: ClosedDayValue[];
+};
+
+export default function Contact({
+  callPhoneNumber,
+  whatsappPhoneNumber,
+  openingHours,
+  closedDays,
+}: ContactProps) {
   const t = useTranslations('contact');
   const locale = useLocale();
   const isRTL = locale === 'ar';
-  const phoneNumber = t('phoneNumber');
-  const telHref = `tel:${phoneNumber.replace(/[^+\d]/g, '')}`;
-  const whatsappHref = `https://wa.me/${phoneNumber.replace(/[^\d]/g, '')}`;
+  const telHref = `tel:${callPhoneNumber.replace(/[^+\d]/g, '')}`;
+  const whatsappHref = `https://wa.me/${whatsappPhoneNumber.replace(/[^\d]/g, '')}`;
   const instagramHref = "https://www.instagram.com/furnzewede/";
   const mapEmbedSrc = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d205.7858834785793!2d35.78710307249401!3d34.386750156807345!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1521f1315f611be5%3A0x950c4b2b2c3e4bab!2sZewede!5e0!3m2!1sen!2slb!4v1770558694139!5m2!1sen!2slb";
+  const closedDaysLabel =
+    closedDays.length > 0
+      ? closedDays.map((day) => t(`days.${day}`)).join(locale === 'ar' ? '، ' : ', ')
+      : null;
+  const statusLabel = closedDaysLabel
+    ? t('statusClosedDays', { days: closedDaysLabel })
+    : t('statusOpenEveryDay');
 
   return (
     <section id="contact" className="py-16 px-6 bg-hlb-bg">
@@ -45,7 +64,7 @@ export default function Contact() {
                   dir="ltr"
                   style={{ unicodeBidi: 'bidi-override' }}
                 >
-                  {phoneNumber}
+                  {callPhoneNumber}
                 </p>
 
                 <Button
@@ -100,8 +119,8 @@ export default function Contact() {
                     <Clock3 className="h-5 w-5 text-hlb-primary shrink-0" />
                     <h4 className="font-bold text-hlb-primary">{t('hours')}</h4>
                   </div>
-                  <p className="text-hlb-text">{t('schedule')}</p>
-                  <p className="text-hlb-text-light">{t('status')}</p>
+                  <p className="text-hlb-text">{openingHours}</p>
+                  <p className="text-hlb-text-light">{statusLabel}</p>
                 </div>
               </CardBody>
             </Card>

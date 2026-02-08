@@ -6,6 +6,7 @@ import { checkUserOnboarded } from '@/utils/auth.utils';
 import { getLocale } from 'next-intl/server';
 import { createClient } from '@/utils/supabase/server';
 import { getPublicMenuItems } from '@/utils/menu-items';
+import { DEFAULT_SITE_SETTINGS, normalizeClosedDays } from '@/utils/site-settings';
 
 type Translation = { locale: string; name: string; description?: string | null };
 
@@ -48,11 +49,36 @@ export default async function Home() {
     locale,
   });
 
+  const { data: settingsData } = await supabase
+    .from('site_settings')
+    .select('hero_image_key, hero_image_backup_key, call_phone_number, whatsapp_phone_number, opening_hours_en, opening_hours_ar, closed_days')
+    .maybeSingle();
+
+  const siteSettings = {
+    heroImageKey: settingsData?.hero_image_key ?? DEFAULT_SITE_SETTINGS.hero_image_key,
+    heroImageBackupKey: settingsData?.hero_image_backup_key ?? DEFAULT_SITE_SETTINGS.hero_image_backup_key,
+    callPhoneNumber: settingsData?.call_phone_number ?? DEFAULT_SITE_SETTINGS.call_phone_number,
+    whatsappPhoneNumber: settingsData?.whatsapp_phone_number ?? DEFAULT_SITE_SETTINGS.whatsapp_phone_number,
+    openingHours:
+      locale === 'ar'
+        ? settingsData?.opening_hours_ar ?? DEFAULT_SITE_SETTINGS.opening_hours_ar
+        : settingsData?.opening_hours_en ?? DEFAULT_SITE_SETTINGS.opening_hours_en,
+    closedDays: normalizeClosedDays(settingsData?.closed_days),
+  };
+
   return (
     <main>
-      <Hero />
+      <Hero
+        heroImageKey={siteSettings.heroImageKey}
+        heroImageBackupKey={siteSettings.heroImageBackupKey}
+      />
       <MenuGrid categories={categories} items={menuItems} />
-      <Contact />
+      <Contact
+        callPhoneNumber={siteSettings.callPhoneNumber}
+        whatsappPhoneNumber={siteSettings.whatsappPhoneNumber}
+        openingHours={siteSettings.openingHours}
+        closedDays={siteSettings.closedDays}
+      />
     </main>
   );
 }

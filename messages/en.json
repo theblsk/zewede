@@ -44,7 +44,6 @@
     "title": "Contact Us",
     "subtitle": "Get in touch with us for orders and inquiries",
     "phone": "Phone",
-    "phoneNumber": "+961 81 484 472",
     "callNow": "Call Now",
     "whatsapp": "WhatsApp",
     "instagram": "Instagram",
@@ -52,8 +51,17 @@
     "address": "Kalamoun - Cafes Square - Opposite Abu Tammam Library",
     "city": "Lebanon",
     "hours": "Opening Hours",
-    "schedule": "7:30 AM - 2:30 PM, 6:00 PM - 10:00 PM",
-    "status": "Open Every Day"
+    "statusOpenEveryDay": "Open Every Day",
+    "statusClosedDays": "Closed on {days}",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    }
   },
   "footer": {
     "title": "ZEWEDE - Lebanese Traditional Bakery",
@@ -244,6 +252,30 @@
         "enable": "Enable menu item",
         "disable": "Disable menu item"
       }
+    },
+    "settings": {
+      "title": "Landing Settings",
+      "subtitle": "Manage hero image, phones, and opening schedule for the public page.",
+      "heroImageLabel": "Hero Image",
+      "heroImageInput": "Hero image",
+      "heroImageFallbackHint": "Fallback image: {path}",
+      "useBackupImage": "Use Backup Image",
+      "callPhoneLabel": "Call Phone Number",
+      "whatsappPhoneLabel": "WhatsApp Phone Number",
+      "openingHoursEnglishLabel": "Opening Hours (English)",
+      "openingHoursArabicLabel": "Opening Hours (Arabic)",
+      "closedDaysLabel": "Closed Days",
+      "days": {
+        "monday": "Monday",
+        "tuesday": "Tuesday",
+        "wednesday": "Wednesday",
+        "thursday": "Thursday",
+        "friday": "Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday"
+      },
+      "save": "Save Settings",
+      "validationError": "Please review your settings input."
     },
     "search": {
       "placeholder": "Search menu items",

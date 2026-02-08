@@ -240,6 +240,45 @@ export type Database = {
           },
         ]
       }
+      site_settings: {
+        Row: {
+          call_phone_number: string
+          closed_days: string[]
+          created_at: string
+          hero_image_backup_key: string | null
+          hero_image_key: string | null
+          id: string
+          opening_hours_ar: string
+          opening_hours_en: string
+          updated_at: string
+          whatsapp_phone_number: string
+        }
+        Insert: {
+          call_phone_number?: string
+          closed_days?: string[]
+          created_at?: string
+          hero_image_backup_key?: string | null
+          hero_image_key?: string | null
+          id?: string
+          opening_hours_ar?: string
+          opening_hours_en?: string
+          updated_at?: string
+          whatsapp_phone_number?: string
+        }
+        Update: {
+          call_phone_number?: string
+          closed_days?: string[]
+          created_at?: string
+          hero_image_backup_key?: string | null
+          hero_image_key?: string | null
+          id?: string
+          opening_hours_ar?: string
+          opening_hours_en?: string
+          updated_at?: string
+          whatsapp_phone_number?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/react";
 import { ImagePlus, X } from "lucide-react";
 import { getImageUrl, uploadImage } from "@/utils/image-upload";
@@ -11,12 +11,23 @@ type ImageUploadProps = {
   onChange: (value: string | undefined) => void;
   label?: string;
   disabled?: boolean;
+  bucket?: string;
 };
 
-export function ImageUpload({ value, onChange, label = "Image", disabled }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  onChange,
+  label = "Image",
+  disabled,
+  bucket = "menu-items",
+}: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(getImageUrl(value ?? null));
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setPreviewUrl(getImageUrl(value ?? null, bucket));
+  }, [bucket, value]);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -29,15 +40,15 @@ export function ImageUpload({ value, onChange, label = "Image", disabled }: Imag
       setPreviewUrl(objectUrl);
 
       // Upload to Supabase
-      const path = await uploadImage(file);
+      const path = await uploadImage(file, bucket);
       onChange(path);
       
       // Update preview with remote URL (optional, but good for consistency)
-      setPreviewUrl(getImageUrl(path));
+      setPreviewUrl(getImageUrl(path, bucket));
     } catch (error) {
       console.error("Error uploading image:", error);
       // Revert preview if upload fails
-      setPreviewUrl(getImageUrl(value ?? null));
+      setPreviewUrl(getImageUrl(value ?? null, bucket));
     } finally {
       setIsUploading(false);
     }
@@ -98,4 +109,3 @@ export function ImageUpload({ value, onChange, label = "Image", disabled }: Imag
     </div>
   );
 }
-

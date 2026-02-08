@@ -5,7 +5,9 @@ import { getLocale } from 'next-intl/server';
 
 import { randomUUID } from 'crypto';
 
+import { routing } from '@/i18n/routing';
 import { checkUserOnboarded } from '@/utils/auth.utils';
+import { DEFAULT_SITE_SETTINGS, normalizeClosedDays } from '@/utils/site-settings';
 import { createClient } from '@/utils/supabase/server';
 
 import { z } from 'zod';
@@ -18,6 +20,8 @@ import {
   MenuItemRowType,
   MenuItemUpdateType,
   MenuItemWithRelations,
+  SiteSettingsInsertType,
+  SiteSettingsUpdateType,
 } from '@/types/derived';
 import type { Database } from '@/types/supabase';
 import {
@@ -28,6 +32,10 @@ import {
   menuItemServerSchema,
   type MenuItemFormInput,
 } from '@/validators/menu-item';
+import {
+  settingsServerSchema,
+  type SettingsFormInput,
+} from '@/validators/settings';
 
 type ActionResponse<Data = undefined> = {
   ok: boolean;
@@ -43,6 +51,33 @@ type SearchState = {
     }
   >;
 };
+
+type SiteSettingsRow = Database['public']['Tables']['site_settings']['Row'];
+
+type SiteSettingsPayload = {
+  hero_image_key: string | null;
+  hero_image_backup_key: string | null;
+  call_phone_number: string;
+  whatsapp_phone_number: string;
+  opening_hours_en: string;
+  opening_hours_ar: string;
+  closed_days: string[];
+};
+
+const SITE_SETTINGS_COLUMNS =
+  'id, hero_image_key, hero_image_backup_key, call_phone_number, whatsapp_phone_number, opening_hours_en, opening_hours_ar, closed_days';
+
+const toSiteSettingsPayload = (
+  row: Partial<SiteSettingsRow> | null | undefined
+): SiteSettingsPayload => ({
+  hero_image_key: row?.hero_image_key ?? DEFAULT_SITE_SETTINGS.hero_image_key,
+  hero_image_backup_key: row?.hero_image_backup_key ?? DEFAULT_SITE_SETTINGS.hero_image_backup_key,
+  call_phone_number: row?.call_phone_number ?? DEFAULT_SITE_SETTINGS.call_phone_number,
+  whatsapp_phone_number: row?.whatsapp_phone_number ?? DEFAULT_SITE_SETTINGS.whatsapp_phone_number,
+  opening_hours_en: row?.opening_hours_en ?? DEFAULT_SITE_SETTINGS.opening_hours_en,
+  opening_hours_ar: row?.opening_hours_ar ?? DEFAULT_SITE_SETTINGS.opening_hours_ar,
+  closed_days: normalizeClosedDays(row?.closed_days),
+});
 
 const ensureStaff = async () => {
   const user = await checkUserOnboarded();
@@ -1097,4 +1132,117 @@ export const getMenuItemsForDashboard = async (filters?: DashboardMenuItemFilter
   });
 
   return items;
+};
+
+export const getSiteSettingsForDashboard = async () => {
+  await ensureStaff();
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select(SITE_SETTINGS_COLUMNS)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  if (data) {
+    return {
+      id: data.id,
+      ...toSiteSettingsPayload(data),
+    };
+  }
+
+  const insertPayload: SiteSettingsInsertType = {
+    ...DEFAULT_SITE_SETTINGS,
+  };
+
+  const { data: createdData, error: createError } = await supabase
+    .from('site_settings')
+    .insert(insertPayload)
+    .select(SITE_SETTINGS_COLUMNS)
+    .single();
+
+  if (createError) {
+    throw new Error(createError.message);
+  }
+
+  return {
+    id: createdData.id,
+    ...toSiteSettingsPayload(createdData),
+  };
+};
+
+export const updateSiteSettingsFromValues = async (
+  input: SettingsFormInput & { locale?: string }
+): Promise<ActionResponse> => {
+  await ensureStaff();
+  const locale = await resolveLocale(input.locale);
+  const supabase = await createClient();
+
+  const parsed = settingsServerSchema.safeParse({
+    heroImageKey: input.hero_image_key,
+    callPhoneNumber: input.call_phone_number,
+    whatsappPhoneNumber: input.whatsapp_phone_number,
+    openingHoursEn: input.opening_hours_en,
+    openingHoursAr: input.opening_hours_ar,
+    closedDays: input.closed_days,
+  });
+
+  if (!parsed.success) {
+    return { ok: false, message: 'Invalid settings data.' };
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from('site_settings')
+    .select(SITE_SETTINGS_COLUMNS)
+    .maybeSingle();
+
+  if (existingError) {
+    return { ok: false, message: existingError.message };
+  }
+
+  const heroImageChanged = existing?.hero_image_key !== parsed.data.heroImageKey;
+  const nextBackupKey = heroImageChanged
+    ? existing?.hero_image_key ?? null
+    : existing?.hero_image_backup_key ?? null;
+
+  const payload: SiteSettingsUpdateType = {
+    hero_image_key: parsed.data.heroImageKey,
+    hero_image_backup_key: nextBackupKey,
+    call_phone_number: parsed.data.callPhoneNumber,
+    whatsapp_phone_number: parsed.data.whatsappPhoneNumber,
+    opening_hours_en: parsed.data.openingHoursEn,
+    opening_hours_ar: parsed.data.openingHoursAr,
+    closed_days: parsed.data.closedDays,
+  };
+
+  let updateError: { message: string } | null = null;
+
+  if (existing?.id) {
+    const { error } = await supabase
+      .from('site_settings')
+      .update(payload)
+      .eq('id', existing.id);
+    updateError = error;
+  } else {
+    const insertPayload: SiteSettingsInsertType = {
+      ...payload,
+    };
+    const { error } = await supabase.from('site_settings').insert(insertPayload);
+    updateError = error;
+  }
+
+  if (updateError) {
+    return { ok: false, message: updateError.message };
+  }
+
+  for (const availableLocale of routing.locales) {
+    revalidatePath(`/${availableLocale}`, 'page');
+    revalidatePath(`/${availableLocale}/dashboard`, 'page');
+  }
+  revalidatePath(`/${locale}/dashboard`, 'page');
+
+  return { ok: true, message: 'Settings updated successfully.' };
 };
