@@ -6,6 +6,8 @@ import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from '@/i18n/navigation';
 import { useSearchParams } from 'next/navigation';
 
+const PREFERENCE_KEY = 'preferredLocale';
+
 export function LanguageSwitcher() {
   const locale = useLocale(); // 'en' | 'ar'
   const pathname = usePathname();
@@ -14,6 +16,7 @@ export function LanguageSwitcher() {
 
   function handleLanguageSwitch() {
     const nextLocale = locale === 'en' ? 'ar' : 'en';
+    localStorage.setItem(PREFERENCE_KEY, nextLocale);
     const query = searchParams.toString();
     const target = query ? `${pathname}?${query}` : pathname;
     // Replace current route with the same path under the other locale

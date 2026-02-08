@@ -22,6 +22,8 @@ type PublicNavbarProps = {
   isLoggedIn?: boolean;
 };
 
+const PREFERENCE_KEY = 'preferredLocale';
+
 export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = false }: PublicNavbarProps) {
   const t = useTranslations('navbar');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,6 +34,7 @@ export default function PublicNavbar({ showDashboardLink = false, isLoggedIn = f
 
   function handleLanguageSwitch() {
     const nextLocale = locale === 'en' ? 'ar' : 'en';
+    localStorage.setItem(PREFERENCE_KEY, nextLocale);
     // Replace current route with the same path under the other locale
     router.replace(pathname, { locale: nextLocale });
   }
