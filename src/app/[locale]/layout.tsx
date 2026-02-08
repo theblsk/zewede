@@ -30,7 +30,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     description: t("description"),
     manifest: "/site.webmanifest",
-    themeColor: "#C58554",
+    // themeColor: "#C58554",
     icons: {
       icon: [
         { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },

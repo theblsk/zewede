@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Button,
@@ -11,6 +11,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -40,12 +41,12 @@ import { getImageUrl } from "@/utils/image-upload";
 
 import {
   deleteMenuItem,
+  getCategoriesForDashboard,
   toggleMenuItemActive,
   getMenuItemsForDashboard,
 } from "@/app/[locale]/(dashboard)/dashboard/actions";
 import type { MenuItemSizeRowType, MenuItemSizeTranslationRowType } from "@/types/derived";
 import { ConfirmationModal } from "@/components/ConfirmationModal";
-import { LoadingOverlay } from "@/components/LoadingOverlay";
 
 type MenuItemsTableProps = {
   locale: string;
@@ -70,15 +71,34 @@ const mapSize = (size: MenuItemSizeRowType & { menu_item_size_translations?: Men
 export function MenuItemsTable({ locale }: MenuItemsTableProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState("");
-  const [availabilityFilter, setAvailabilityFilter] = useState<Set<string>>(
-    new Set()
-  );
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<Set<string>>(new Set());
   const [activeStatusFilter, setActiveStatusFilter] = useState<Set<string>>(
     new Set()
   );
   const t = useTranslations("dashboard.items");
+  const selectedCategoryIds = useMemo(
+    () => Array.from(categoryFilter).sort(),
+    [categoryFilter]
+  );
+  const selectedActiveStatuses = useMemo(
+    () =>
+      Array.from(activeStatusFilter)
+        .filter((status): status is "active" | "inactive" => status === "active" || status === "inactive")
+        .sort(),
+    [activeStatusFilter]
+  );
+  const searchTerm = searchQuery.trim();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchTerm);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
 
   const {
     isOpen: isDeleteConfirmationOpen,
@@ -99,41 +119,26 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
     useState<ToggleConfirmation>(null);
   const [isConfirming, setIsConfirming] = useState(false);
 
-  const { data: menuItems = [], isLoading } = useQuery({
-    queryKey: ["menuItems"],
-    queryFn: getMenuItemsForDashboard,
+  const { data: menuItems = [], isLoading, isFetching } = useQuery({
+    queryKey: ["menuItems", selectedCategoryIds, selectedActiveStatuses, debouncedSearchQuery],
+    queryFn: () =>
+      getMenuItemsForDashboard({
+        categoryIds: selectedCategoryIds,
+        activeStatuses: selectedActiveStatuses,
+        search: debouncedSearchQuery,
+      }),
   });
 
-  const filteredItems = menuItems.filter((item) => {
-    const q = searchQuery.trim().toLowerCase();
-    const matchesQuery =
-      !q ||
-      item.name.toLowerCase().includes(q) ||
-      (item.name_ar ?? "").toLowerCase().includes(q) ||
-      (item.description ?? "").toLowerCase().includes(q) ||
-      (item.description_ar ?? "").toLowerCase().includes(q);
-
-    const matchesAvailability = (() => {
-      const allSelected =
-        availabilityFilter.has("available") &&
-        availabilityFilter.has("unavailable");
-      if (availabilityFilter.size === 0 || allSelected) return true;
-      return availabilityFilter.has(
-        item.availability ? "available" : "unavailable"
-      );
-    })();
-
-    const matchesActive = (() => {
-      const allSelected =
-        activeStatusFilter.has("active") && activeStatusFilter.has("inactive");
-      if (activeStatusFilter.size === 0 || allSelected) return true;
-      return activeStatusFilter.has(item.is_active ? "active" : "inactive");
-    })();
-
-    return (
-      matchesQuery && matchesAvailability && matchesActive
-    );
+  const { data: categories = [] } = useQuery({
+    queryKey: ["categories"],
+    queryFn: () => getCategoriesForDashboard(),
   });
+
+  const categoryOptions = useMemo(() => {
+    return categories
+      .map((category) => ({ id: category.id, name: category.name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [categories]);
 
   const handleDeleteItem = async (itemId: string) => {
     const formData = new FormData();
@@ -174,17 +179,8 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-center py-8">
-            <LoadingOverlay isLoading={true} />
-          </div>
-        </CardBody>
-      </Card>
-    );
-  }
+  const isTableLoading =
+    isLoading || isFetching || searchTerm !== debouncedSearchQuery;
 
   return (
     <div className="space-y-4">
@@ -214,15 +210,16 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
               <div className="p-3 w-[280px] space-y-3">
                 <Select
                   selectionMode="multiple"
-                  label={t("filters.availability")}
+                  label={t("filters.category")}
                   placeholder={t("filters.all")}
-                  selectedKeys={availabilityFilter}
+                  selectedKeys={categoryFilter}
                   onSelectionChange={(keys) =>
-                    setAvailabilityFilter(new Set(keys as Set<string>))
+                    setCategoryFilter(new Set(keys as Set<string>))
                   }
                 >
-                  <SelectItem key="available">{t("filters.available")}</SelectItem>
-                  <SelectItem key="unavailable">{t("filters.unavailable")}</SelectItem>
+                  {categoryOptions.map((category) => (
+                    <SelectItem key={category.id}>{category.name}</SelectItem>
+                  ))}
                 </Select>
                 <Select
                   selectionMode="multiple"
@@ -241,7 +238,7 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                     size="sm"
                     variant="light"
                     onPress={() => {
-                      setAvailabilityFilter(new Set());
+                      setCategoryFilter(new Set());
                       setActiveStatusFilter(new Set());
                     }}
                   >
@@ -275,11 +272,13 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
               <TableColumn>{t("table.columns.actions")}</TableColumn>
             </TableHeader>
             <TableBody
+              isLoading={isTableLoading}
+              loadingContent={<Spinner size="sm" color="primary" />}
               emptyContent={
-                searchQuery ? t("table.empty.search") : t("table.empty.default")
+                debouncedSearchQuery ? t("table.empty.search") : t("table.empty.default")
               }
             >
-              {filteredItems.map((item) => {
+              {menuItems.map((item) => {
                 const imageUrl = getImageUrl(item.image_key);
                 return (
                   <TableRow key={item.id}>
@@ -314,20 +313,9 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Chip
-                          size="sm"
-                          color={item.availability ? "success" : "warning"}
-                        >
-                          {item.availability ? t("filters.available") : t("filters.unavailable")}
-                        </Chip>
-                        <Chip
-                          size="sm"
-                          color={item.is_active ? "primary" : "default"}
-                        >
-                          {item.is_active ? t("filters.active") : t("filters.inactive")}
-                        </Chip>
-                      </div>
+                      <Chip size="sm" color={item.is_active ? "primary" : "default"}>
+                        {item.is_active ? t("filters.active") : t("filters.inactive")}
+                      </Chip>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
@@ -462,7 +450,6 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
           isLoading={isConfirming}
         />
       ) : null}
-      <LoadingOverlay isLoading={isPending} />
     </div>
   );
 }

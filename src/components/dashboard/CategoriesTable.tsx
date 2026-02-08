@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Button,
@@ -9,6 +9,7 @@ import {
   CardHeader,
   Chip,
   Input,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -28,7 +29,6 @@ import {
   getCategoriesForDashboard,
 } from '@/app/[locale]/(dashboard)/dashboard/actions';
 import { ConfirmationModal } from '@/components/ConfirmationModal';
-import { LoadingOverlay } from '@/components/LoadingOverlay';
 
 type CategoriesTableProps = {
   locale: string;
@@ -41,10 +41,20 @@ type ConfirmationConfig =
 export function CategoriesTable({ locale }: CategoriesTableProps) {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [isConfirming, setIsConfirming] = useState(false);
   const t = useTranslations('dashboard.categories');
+  const searchTerm = searchQuery.trim();
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedSearchQuery(searchTerm);
+    }, 300);
+
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
 
   const {
     isOpen: isConfirmationOpen,
@@ -55,21 +65,13 @@ export function CategoriesTable({ locale }: CategoriesTableProps) {
 
   const [confirmationConfig, setConfirmationConfig] = useState<ConfirmationConfig | null>(null);
 
-  const { data: categories = [], isLoading } = useQuery({
-    queryKey: ['categories'],
-    queryFn: getCategoriesForDashboard,
+  const { data: categories = [], isLoading, isFetching } = useQuery({
+    queryKey: ['categories', debouncedSearchQuery],
+    queryFn: () => getCategoriesForDashboard({ search: debouncedSearchQuery }),
   });
 
-  const filteredCategories = categories.filter((category) => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return true;
-    return (
-      category.name.toLowerCase().includes(q) ||
-      (category.name_ar ?? '').toLowerCase().includes(q) ||
-      (category.description ?? '').toLowerCase().includes(q) ||
-      (category.description_ar ?? '').toLowerCase().includes(q)
-    );
-  });
+  const isTableLoading =
+    isLoading || isFetching || searchTerm !== debouncedSearchQuery;
 
   const handleDeleteCategory = async (categoryId: string) => {
     setIsConfirming(true);
@@ -149,18 +151,6 @@ export function CategoriesTable({ locale }: CategoriesTableProps) {
 
   const confirmationProps = getConfirmationProps();
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardBody>
-          <div className="flex items-center justify-center py-8">
-            <LoadingOverlay isLoading={true} />
-          </div>
-        </CardBody>
-      </Card>
-    );
-  }
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -198,11 +188,13 @@ export function CategoriesTable({ locale }: CategoriesTableProps) {
               <TableColumn>{t('table.columns.actions')}</TableColumn>
             </TableHeader>
             <TableBody
+              isLoading={isTableLoading}
+              loadingContent={<Spinner size="sm" color="primary" />}
               emptyContent={
-                searchQuery ? t('table.empty.search') : t('table.empty.default')
+                debouncedSearchQuery ? t('table.empty.search') : t('table.empty.default')
               }
             >
-              {filteredCategories.map((category) => (
+              {categories.map((category) => (
                 <TableRow key={category.id}>
                   <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell>{category.name_ar ?? '—'}</TableCell>
@@ -276,8 +268,6 @@ export function CategoriesTable({ locale }: CategoriesTableProps) {
           {...confirmationProps}
         />
       ) : null}
-
-      <LoadingOverlay isLoading={isPending} />
     </div>
   );
 }

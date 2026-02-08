@@ -202,6 +202,7 @@
       "filters": {
         "title": "Filters",
         "priceUnit": "Price Unit",
+        "category": "Category",
         "availability": "Availability",
         "activeStatus": "Active Status",
         "all": "All",

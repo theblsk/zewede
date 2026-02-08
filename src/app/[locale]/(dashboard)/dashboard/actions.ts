@@ -930,17 +930,58 @@ export const deleteMenuItemFromValues = async (
 };
 
 // Fetch helpers for React Query
-export const getCategoriesForDashboard = async () => {
+type DashboardCategoryFilters = {
+  search?: string;
+};
+
+export const getCategoriesForDashboard = async (filters?: DashboardCategoryFilters) => {
   await ensureStaff();
   const supabase = await createClient();
+  const search = filters?.search?.trim();
 
-  const { data: categoriesData } = await supabase
+  let query = supabase
     .from('categories')
     .select(
       `id, name, is_active, description,
        categories_translations(locale, name, description)`
     )
     .order('name', { ascending: true });
+
+  if (search) {
+    const pattern = `%${search}%`;
+
+    const [nameMatchesResult, descriptionMatchesResult, arTranslationMatchesResult] = await Promise.all([
+      supabase.from('categories').select('id').ilike('name', pattern),
+      supabase.from('categories').select('id').ilike('description', pattern),
+      supabase
+        .from('categories_translations')
+        .select('category_id')
+        .eq('locale', 'ar')
+        .or(`name.ilike.${pattern},description.ilike.${pattern}`),
+    ]);
+
+    const matchedIds = new Set<string>();
+
+    for (const category of nameMatchesResult.data ?? []) {
+      matchedIds.add(category.id);
+    }
+
+    for (const category of descriptionMatchesResult.data ?? []) {
+      matchedIds.add(category.id);
+    }
+
+    for (const translation of arTranslationMatchesResult.data ?? []) {
+      matchedIds.add(translation.category_id);
+    }
+
+    if (matchedIds.size === 0) {
+      return [];
+    }
+
+    query = query.in('id', Array.from(matchedIds));
+  }
+
+  const { data: categoriesData } = await query;
 
   type Translation = { locale: string; name: string; description: string | null };
 
@@ -962,11 +1003,18 @@ export const getCategoriesForDashboard = async () => {
   return categories;
 };
 
-export const getMenuItemsForDashboard = async () => {
+type DashboardMenuItemFilters = {
+  categoryIds?: string[];
+  activeStatuses?: Array<'active' | 'inactive'>;
+  search?: string;
+};
+
+export const getMenuItemsForDashboard = async (filters?: DashboardMenuItemFilters) => {
   await ensureStaff();
   const supabase = await createClient();
+  const search = filters?.search?.trim();
 
-  const { data: itemsData } = await supabase
+  let query = supabase
     .from('menu_items')
     .select(
       `*, 
@@ -980,6 +1028,50 @@ export const getMenuItemsForDashboard = async () => {
        menu_items_translations(locale, name, description)`
     )
     .order('name', { ascending: true });
+
+  if (filters?.categoryIds?.length) {
+    query = query.in('category_id', filters.categoryIds);
+  }
+
+  if (filters?.activeStatuses?.length === 1) {
+    query = query.eq('is_active', filters.activeStatuses[0] === 'active');
+  }
+
+  if (search) {
+    const pattern = `%${search}%`;
+
+    const [nameMatchesResult, descriptionMatchesResult, arTranslationMatchesResult] = await Promise.all([
+      supabase.from('menu_items').select('id').ilike('name', pattern),
+      supabase.from('menu_items').select('id').ilike('description', pattern),
+      supabase
+        .from('menu_items_translations')
+        .select('menu_item_id')
+        .eq('locale', 'ar')
+        .or(`name.ilike.${pattern},description.ilike.${pattern}`),
+    ]);
+
+    const matchedIds = new Set<string>();
+
+    for (const item of nameMatchesResult.data ?? []) {
+      matchedIds.add(item.id);
+    }
+
+    for (const item of descriptionMatchesResult.data ?? []) {
+      matchedIds.add(item.id);
+    }
+
+    for (const translation of arTranslationMatchesResult.data ?? []) {
+      matchedIds.add(translation.menu_item_id);
+    }
+
+    if (matchedIds.size === 0) {
+      return [];
+    }
+
+    query = query.in('id', Array.from(matchedIds));
+  }
+
+  const { data: itemsData } = await query;
 
   type Translation = { locale: string; name: string; description: string | null };
   type SizeTranslation = { locale: string; name: string };
@@ -1006,4 +1098,3 @@ export const getMenuItemsForDashboard = async () => {
 
   return items;
 };
-

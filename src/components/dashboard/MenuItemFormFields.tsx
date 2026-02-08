@@ -17,7 +17,7 @@ type MenuItemFormFieldsProps = {
 export const MenuItemFormFields = ({ form, submitLabel, isPending }: MenuItemFormFieldsProps) => {
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
-    queryFn: getCategoriesForDashboard,
+    queryFn: () => getCategoriesForDashboard(),
   });
   const t = useTranslations('dashboard.items.form');
 
