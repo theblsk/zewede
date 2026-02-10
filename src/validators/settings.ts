@@ -14,6 +14,7 @@ export const settingsFormSchema = z.object({
 });
 
 export type SettingsFormInput = z.input<typeof settingsFormSchema>;
+export type SettingsFormValues = z.output<typeof settingsFormSchema>;
 
 export const settingsServerSchema = z.object({
   heroImageKey: z

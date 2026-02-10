@@ -16,7 +16,7 @@ import {
   LANDING_ASSETS_BUCKET,
   normalizeClosedDays,
 } from '@/utils/site-settings';
-import { settingsFormSchema, type SettingsFormInput } from '@/validators/settings';
+import { settingsFormSchema, type SettingsFormValues } from '@/validators/settings';
 
 type SettingsPanelProps = {
   locale: string;
@@ -30,7 +30,7 @@ export function SettingsPanel({ locale }: SettingsPanelProps) {
   const t = useTranslations('dashboard.settings');
   const [formError, setFormError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [values, setValues] = useState<SettingsFormInput>({
+  const [values, setValues] = useState<SettingsFormValues>({
     hero_image_key: '',
     call_phone_number: DEFAULT_SITE_SETTINGS.call_phone_number,
     whatsapp_phone_number: DEFAULT_SITE_SETTINGS.whatsapp_phone_number,
@@ -75,7 +75,7 @@ export function SettingsPanel({ locale }: SettingsPanelProps) {
 
       return {
         ...current,
-        closed_days: Array.from(next) as SettingsFormInput['closed_days'],
+        closed_days: Array.from(next),
       };
     });
   };
