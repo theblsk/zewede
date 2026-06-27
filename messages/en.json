@@ -31,6 +31,14 @@
     "title": "ZEWEDE",
     "description": "Lebanese Traditional Bakery and Savory Pastries."
   },
+  "unsupportedBrowser": {
+    "title": "Browser Not Supported for Dashboard",
+    "description": "The dashboard editor requires a modern browser. Your current browser cannot run the save tools needed to manage menu items and settings.",
+    "detected": "Detected browser: {browser}",
+    "unknownBrowser": "Unknown browser",
+    "recommendation": "On Windows 7, install Firefox 115 ESR to edit the dashboard. Chrome and Edge on Windows 7 are too old for this app.",
+    "backToHome": "Back to home page"
+  },
   "menu": {
     "title": "Our Bakery Menu",
     "subtitle": "Handcrafted Manoushe, Pizza, and Pastries baked to perfection",
@@ -91,6 +99,7 @@
       "details": "Category Details",
       "create": "Create Category",
       "saveChanges": "Save Changes",
+      "saveError": "We couldn't save the category. Please try again.",
       "form": {
         "name": "Name",
         "nameAr": "Arabic Name",
@@ -164,6 +173,7 @@
       "details": "Menu Item Details",
       "create": "Create Menu Item",
       "saveChanges": "Save Changes",
+      "saveError": "We couldn't save the menu item. Please try again.",
       "form": {
         "category": "Category",
         "selectCategory": "Select a category",

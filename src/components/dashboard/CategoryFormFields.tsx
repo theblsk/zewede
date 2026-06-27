@@ -81,8 +81,7 @@ export const CategoryFormFields = ({
       </form.Field>
 
       <form.Field name="is_active">
-        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {(field: any) => (
+        {(field) => (
           <Checkbox
             name={field.name}
             isSelected={field.state.value}

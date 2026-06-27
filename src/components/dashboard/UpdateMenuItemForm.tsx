@@ -2,7 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import type { MenuItemFormInput } from "@/validators/menu-item";
 import { updateMenuItemFromValues } from "@/app/[locale]/(dashboard)/dashboard/actions";
@@ -47,36 +47,48 @@ export function useUpdateMenuItemForm({
   const locale = useLocale();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const [isSaving, setIsSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const t = useTranslations('dashboard.items');
 
   const form = useMenuItemForm({
     defaultValues: menuItemToFormValues(item),
     onSubmit: async (validated) => {
-      const formData: MenuItemFormInput & {
-        locale?: string;
-      } = {
-        locale,
-        ...validated,
-      };
+      setFormError(null);
+      setIsSaving(true);
 
-      const result = await updateMenuItemFromValues(itemId, formData);
-      if (result.ok) {
-        startTransition(() => {
-          router.refresh();
-          onSuccess?.();
-        });
-      } else {
-        console.error(result.message);
+      try {
+        const formData: MenuItemFormInput & {
+          locale?: string;
+        } = {
+          locale,
+          ...validated,
+        };
+
+        const result = await updateMenuItemFromValues(itemId, formData);
+        if (result.ok) {
+          startTransition(() => {
+            router.refresh();
+            onSuccess?.();
+          });
+        } else {
+          setFormError(result.message);
+        }
+      } catch (error) {
+        setFormError(error instanceof Error ? error.message : t('saveError'));
+      } finally {
+        setIsSaving(false);
       }
     },
   });
 
-  return { form, isPending };
+  return { form, formError, isPending: isPending || isSaving };
 }
 
 export type UpdateMenuItemFormType = ReturnType<typeof useUpdateMenuItemForm>;
 
 export const UpdateMenuItemForm = (props: UpdateMenuItemFormProps) => {
-  const { form, isPending } = useUpdateMenuItemForm(props);
+  const { form, formError, isPending } = useUpdateMenuItemForm(props);
   const t = useTranslations('dashboard.items');
 
   return (
@@ -88,6 +100,7 @@ export const UpdateMenuItemForm = (props: UpdateMenuItemFormProps) => {
       }}
       className="flex flex-col gap-4"
     >
+      {formError ? <p className="text-sm text-danger">{formError}</p> : null}
       <MenuItemFormFields form={form} submitLabel={t('saveChanges')} isPending={isPending} />
     </form>
   );
