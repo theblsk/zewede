@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
+import { ZodError } from "zod";
 import {
   categoryFormSchema,
   type CategoryFormInput,
@@ -59,10 +60,17 @@ export function useCreateCategoryForm({ onSuccess }: CreateCategoryFormProps) {
             onSuccess?.();
           });
         } else {
-          setFormError(result.message);
+          setFormError(result.message || t('saveError'));
         }
       } catch (error) {
-        setFormError(error instanceof Error ? error.message : t('saveError'));
+        if (error instanceof ZodError) {
+          const firstIssue = error.issues[0];
+          setFormError(firstIssue?.message ?? t('saveError'));
+        } else if (error instanceof Error && error.message) {
+          setFormError(error.message);
+        } else {
+          setFormError(t('saveError'));
+        }
       } finally {
         setIsSaving(false);
       }

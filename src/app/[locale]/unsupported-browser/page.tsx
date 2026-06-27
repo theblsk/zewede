@@ -2,7 +2,7 @@ import { headers } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import { Link } from '@/i18n/navigation';
-import { parseUserAgent } from '@/utils/browser-support';
+import { formatDetectedBrowser, parseUserAgent } from '@/utils/browser-support';
 
 export default async function UnsupportedBrowserPage() {
   const t = await getTranslations('unsupportedBrowser');
@@ -10,7 +10,7 @@ export default async function UnsupportedBrowserPage() {
   const browserInfo = parseUserAgent(userAgent);
 
   const detectedBrowser = browserInfo
-    ? `${browserInfo.name} ${browserInfo.version}`
+    ? formatDetectedBrowser(browserInfo)
     : t('unknownBrowser');
 
   return (

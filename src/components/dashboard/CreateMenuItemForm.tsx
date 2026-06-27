@@ -45,7 +45,7 @@ export function useCreateMenuItemForm({ onSuccess }: CreateMenuItemFormProps) {
             onSuccess?.();
           });
         } else {
-          setFormError(result.message);
+          setFormError(result.message || t('saveError'));
         }
       } catch (error) {
         setFormError(error instanceof Error ? error.message : t('saveError'));

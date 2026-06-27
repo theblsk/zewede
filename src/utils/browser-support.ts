@@ -1,9 +1,27 @@
 export type BrowserInfo = {
   name: string;
-  version: number;
+  version?: number;
   isSupported: boolean;
   reason?: 'ie' | 'firefox_outdated' | 'chromium_outdated' | 'safari_outdated';
 };
+
+function parseInternetExplorerVersion(userAgent: string): number | undefined {
+  const rvMatch = userAgent.match(/rv:(\d+(?:\.\d+)?)/);
+  if (rvMatch) {
+    return Number.parseFloat(rvMatch[1]);
+  }
+
+  const msieMatch = userAgent.match(/MSIE (\d+(?:\.\d+)?)/);
+  if (msieMatch) {
+    return Number.parseFloat(msieMatch[1]);
+  }
+
+  return undefined;
+}
+
+export function formatDetectedBrowser(info: BrowserInfo): string {
+  return info.version !== undefined ? `${info.name} ${info.version}` : info.name;
+}
 
 const MIN_VERSIONS = {
   chrome: 111,
@@ -20,7 +38,7 @@ export function parseUserAgent(userAgent: string | null): BrowserInfo | null {
   if (/MSIE|Trident/.test(userAgent)) {
     return {
       name: 'Internet Explorer',
-      version: 0,
+      version: parseInternetExplorerVersion(userAgent),
       isSupported: false,
       reason: 'ie',
     };
