@@ -211,13 +211,14 @@ export default function OnboardingForm({ countryOptions }: OnboardingFormProps) 
           </label>
           <div className="flex flex-col items-start sm:flex-row gap-3 sm:gap-3">
             <form.Field name="country_code">
-              {(field) => (
+              {(field) => {
+                const selectedCountryCode = countryOptions.find(
+                  (option) => option.callingCode === field.state.value
+                )?.code;
+
+                return (
                 <Select
-                  selectedKeys={[
-                    countryOptions.find(
-                      (option) => option.callingCode === field.state.value
-                    )?.code ?? "",
-                  ]}
+                  selectedKeys={selectedCountryCode ? [selectedCountryCode] : []}
                   onSelectionChange={(keys) => {
                     const selectedKey = Array.from(keys)[0] as
                       | string
@@ -274,7 +275,8 @@ export default function OnboardingForm({ countryOptions }: OnboardingFormProps) 
                     </SelectItem>
                   ))}
                 </Select>
-              )}
+                );
+              }}
             </form.Field>
 
             <form.Field

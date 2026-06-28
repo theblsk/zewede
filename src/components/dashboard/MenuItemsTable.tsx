@@ -140,6 +140,13 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [categories]);
 
+  const validCategoryFilterKeys = useMemo(() => {
+    const optionIds = new Set(categoryOptions.map((category) => category.id));
+    return new Set(
+      Array.from(categoryFilter).filter((categoryId) => optionIds.has(categoryId))
+    );
+  }, [categoryFilter, categoryOptions]);
+
   const handleDeleteItem = async (itemId: string) => {
     const formData = new FormData();
     formData.append("id", itemId);
@@ -212,7 +219,7 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                   selectionMode="multiple"
                   label={t("filters.category")}
                   placeholder={t("filters.all")}
-                  selectedKeys={categoryFilter}
+                  selectedKeys={validCategoryFilterKeys}
                   onSelectionChange={(keys) =>
                     setCategoryFilter(new Set(keys as Set<string>))
                   }

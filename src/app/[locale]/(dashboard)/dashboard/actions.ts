@@ -103,6 +103,53 @@ const resolveLocale = async (formLocale?: unknown) => {
   return getLocale();
 };
 
+type ActionFailureKind =
+  | 'categorySave'
+  | 'categoryDelete'
+  | 'categoryToggle'
+  | 'menuItemSave'
+  | 'menuItemDelete'
+  | 'menuItemToggle'
+  | 'menuItemSizes'
+  | 'settingsSave'
+  | 'settingsLoad';
+
+const FAILURE_MESSAGES: Record<ActionFailureKind, string> = {
+  categorySave: 'Unable to save category. Please try again.',
+  categoryDelete: 'Unable to delete category. Please try again.',
+  categoryToggle: 'Unable to update category status. Please try again.',
+  menuItemSave: 'Unable to save menu item. Please try again.',
+  menuItemDelete: 'Unable to delete menu item. Please try again.',
+  menuItemToggle: 'Unable to update menu item status. Please try again.',
+  menuItemSizes: 'Unable to save menu item sizes. Please try again.',
+  settingsSave: 'Unable to save settings. Please try again.',
+  settingsLoad: 'Unable to load settings. Please try again.',
+};
+
+function failDashboardAction(
+  kind: ActionFailureKind,
+  error: { message?: string } | null | undefined,
+  context?: Record<string, unknown>,
+): ActionResponse {
+  console.error(`Dashboard action failed: ${kind}`, {
+    message: error?.message,
+    ...context,
+  });
+  return { ok: false, message: FAILURE_MESSAGES[kind] };
+}
+
+function logDashboardLoadFailure(
+  kind: ActionFailureKind,
+  error: { message?: string } | null | undefined,
+  context?: Record<string, unknown>,
+): never {
+  console.error(`Dashboard action failed: ${kind}`, {
+    message: error?.message,
+    ...context,
+  });
+  throw new Error(FAILURE_MESSAGES[kind]);
+}
+
 function slugify(value: string) {
   return value.normalize('NFKD')
       .replace(/[\u0300-\u036f]/g, "") // remove diacritics
@@ -187,7 +234,7 @@ export const createCategory = async (formData: FormData): Promise<ActionResponse
     .maybeSingle();
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categorySave', error);
   }
 
   // Optional Arabic translation upsert
@@ -244,7 +291,7 @@ export const updateCategory = async (formData: FormData): Promise<ActionResponse
     .eq('id', categoryId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categorySave', error, { categoryId });
   }
 
   // Optional Arabic translation upsert
@@ -281,7 +328,7 @@ export const deleteCategory = async (formData: FormData): Promise<ActionResponse
   const { error } = await supabase.from('categories').delete().eq('id', categoryId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categoryDelete', error, { categoryId });
   }
 
   await revalidatePath(`/${locale}/dashboard`, 'page');
@@ -323,7 +370,7 @@ export const createMenuItem = async (formData: FormData): Promise<ActionResponse
     .maybeSingle();
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemSave', error);
   }
 
   // Handle max order limit if provided
@@ -424,7 +471,7 @@ export const updateMenuItem = async (formData: FormData): Promise<ActionResponse
     .eq('id', itemId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemSave', error, { itemId });
   }
 
   // Handle max order limit if provided
@@ -513,7 +560,7 @@ export const deleteMenuItem = async (formData: FormData): Promise<ActionResponse
   const { error } = await supabase.from('menu_items').delete().eq('id', itemId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemDelete', error, { itemId });
   }
 
   await revalidatePath(`/${locale}/dashboard`, 'page');
@@ -537,7 +584,7 @@ export const toggleCategoryActive = async (formData: FormData): Promise<ActionRe
     .eq('id', categoryId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categoryToggle', error, { categoryId, isActive });
   }
 
   revalidatePath(`/${locale}/dashboard`, 'page');
@@ -561,7 +608,7 @@ export const toggleMenuItemActive = async (formData: FormData): Promise<ActionRe
     .eq('id', itemId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemToggle', error, { itemId, isActive });
   }
 
   revalidatePath(`/${locale}/dashboard`, 'page');
@@ -635,7 +682,7 @@ export const createCategoryFromValues = async (
     .maybeSingle();
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categorySave', error);
   }
 
   // Optional Arabic translation upsert
@@ -690,7 +737,7 @@ export const updateCategoryFromValues = async (
     .eq('id', categoryId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('categorySave', error, { categoryId });
   }
 
   // Optional Arabic translation upsert
@@ -775,7 +822,7 @@ export const createMenuItemFromValues = async (
     .maybeSingle();
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemSave', error);
   }
 
   // Insert sizes + translations atomically (avoid N+1)
@@ -804,7 +851,9 @@ export const createMenuItemFromValues = async (
     );
 
     if (sizesInsertError) {
-      return { ok: false, message: sizesInsertError.message };
+      return failDashboardAction('menuItemSizes', sizesInsertError, {
+        menuItemId: createdItem.id,
+      });
     }
   }
 
@@ -873,56 +922,34 @@ export const updateMenuItemFromValues = async (
     .eq('id', itemId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemSave', error, { itemId });
   }
 
-  // Get existing sizes to delete translations
-  const { data: existingSizes } = await supabase
-    .from('menu_item_sizes')
-    .select('id')
-    .eq('menu_item_id', itemId);
+  const sizesPayload: Array<{
+    id: string;
+    price: number;
+    is_active: boolean;
+    name: string;
+    name_ar: string | null;
+  }> = parsed.data.sizes.map((size) => ({
+    id: size.id ?? randomUUID(),
+    price: size.price,
+    is_active: size.isActive,
+    name: size.name,
+    name_ar:
+      size.nameAr && size.nameAr.trim().length > 0 ? size.nameAr.trim() : null,
+  }));
 
-  // Delete all existing sizes (cascade will delete translations)
-  if (existingSizes && existingSizes.length > 0) {
-    await supabase
-      .from('menu_item_sizes')
-      .delete()
-      .eq('menu_item_id', itemId);
-  }
-
-  // Insert new sizes and their translations
-  for (const size of parsed.data.sizes) {
-    const { data: createdSize, error: sizeError } = await supabase
-      .from('menu_item_sizes')
-      .insert({
-        menu_item_id: itemId,
-        price: size.price,
-        is_active: size.isActive,
-      })
-      .select('id')
-      .maybeSingle();
-
-    if (sizeError) {
-      return { ok: false, message: `Failed to update size: ${sizeError.message}` };
+  const { error: sizesReplaceError } = await supabase.rpc(
+    'replace_menu_item_sizes_with_translations',
+    {
+      menu_item_id: itemId,
+      sizes: sizesPayload,
     }
+  );
 
-    if (createdSize?.id) {
-      // Insert English translation (name is required)
-      await supabase.from('menu_item_size_translations').insert({
-        menu_item_size_id: createdSize.id,
-        locale: 'en',
-        name: size.name,
-      });
-
-      // Insert Arabic translation if provided
-      if (size.nameAr && size.nameAr.trim().length > 0) {
-        await supabase.from('menu_item_size_translations').insert({
-          menu_item_size_id: createdSize.id,
-          locale: 'ar',
-          name: size.nameAr.trim(),
-        });
-      }
-    }
+  if (sizesReplaceError) {
+    return failDashboardAction('menuItemSizes', sizesReplaceError, { itemId });
   }
 
   // Optional Arabic translation upsert
@@ -957,7 +984,7 @@ export const deleteMenuItemFromValues = async (
   const { error } = await supabase.from('menu_items').delete().eq('id', itemId);
 
   if (error) {
-    return { ok: false, message: error.message };
+    return failDashboardAction('menuItemDelete', error, { itemId });
   }
 
   revalidatePath(`/${resolvedLocale}/dashboard`);
@@ -1144,7 +1171,7 @@ export const getSiteSettingsForDashboard = async () => {
     .maybeSingle();
 
   if (error) {
-    throw new Error(error.message);
+    logDashboardLoadFailure('settingsLoad', error);
   }
 
   if (data) {
@@ -1165,7 +1192,7 @@ export const getSiteSettingsForDashboard = async () => {
     .single();
 
   if (createError) {
-    throw new Error(createError.message);
+    logDashboardLoadFailure('settingsLoad', createError);
   }
 
   return {
@@ -1200,7 +1227,7 @@ export const updateSiteSettingsFromValues = async (
     .maybeSingle();
 
   if (existingError) {
-    return { ok: false, message: existingError.message };
+    return failDashboardAction('settingsSave', existingError);
   }
 
   const heroImageChanged = existing?.hero_image_key !== parsed.data.heroImageKey;
@@ -1235,7 +1262,7 @@ export const updateSiteSettingsFromValues = async (
   }
 
   if (updateError) {
-    return { ok: false, message: updateError.message };
+    return failDashboardAction('settingsSave', updateError);
   }
 
   for (const availableLocale of routing.locales) {
