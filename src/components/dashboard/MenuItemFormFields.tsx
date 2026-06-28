@@ -15,7 +15,7 @@ type MenuItemFormFieldsProps = {
 };
 
 export const MenuItemFormFields = ({ form, submitLabel, isPending }: MenuItemFormFieldsProps) => {
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: () => getCategoriesForDashboard(),
   });
@@ -35,29 +35,38 @@ export const MenuItemFormFields = ({ form, submitLabel, isPending }: MenuItemFor
       </form.Field>
 
       <form.Field name="category_id">
-        {(field) => (
-          <Select
-            name={field.name}
-            label={t('category')}
-            placeholder={t('selectCategory')}
-            selectedKeys={field.state.value ? [String(field.state.value)] : []}
-            variant="bordered"
-            isRequired
-            isInvalid={field.state.meta.errors.length > 0}
-            errorMessage={field.state.meta.errors.join(", ")}
-            onSelectionChange={(keys) => {
-              const key = Array.from(keys as Set<string>)[0];
-              field.handleChange(key ?? "");
-            }}
-            onBlur={field.handleBlur}
-          >
-            {categories.map((category) => (
-              <SelectItem key={category.id}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </Select>
-        )}
+        {(field) => {
+          const selectedCategoryId = field.state.value ? String(field.state.value) : "";
+          const selectedCategoryKeys =
+            selectedCategoryId && categories.some((category) => category.id === selectedCategoryId)
+              ? [selectedCategoryId]
+              : [];
+
+          return (
+            <Select
+              name={field.name}
+              label={t('category')}
+              placeholder={t('selectCategory')}
+              selectedKeys={selectedCategoryKeys}
+              variant="bordered"
+              isRequired
+              isDisabled={isPending || isCategoriesLoading}
+              isInvalid={field.state.meta.errors.length > 0}
+              errorMessage={field.state.meta.errors.join(", ")}
+              onSelectionChange={(keys) => {
+                const key = Array.from(keys as Set<string>)[0];
+                field.handleChange(key ?? "");
+              }}
+              onBlur={field.handleBlur}
+            >
+              {categories.map((category) => (
+                <SelectItem key={category.id}>
+                  {category.name}
+                </SelectItem>
+              ))}
+            </Select>
+          );
+        }}
       </form.Field>
 
       <form.Field name="name">
