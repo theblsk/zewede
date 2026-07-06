@@ -28,7 +28,7 @@ export const MenuItemFormFields = ({ form, submitLabel, isPending }: MenuItemFor
           <ImageUpload
             label={t('image')}
             value={field.state.value ?? undefined}
-            onChange={field.handleChange}
+            onChange={(value) => field.handleChange(value ?? "")}
             disabled={isPending}
           />
         )}
