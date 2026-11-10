@@ -40,6 +40,12 @@
     "backToHome": "Back to home page"
   },
   "menu": {
+    "sort": {
+      "label": "Sort by",
+      "name": "Name (A–Z)",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low"
+    },
     "title": "Our Bakery Menu",
     "subtitle": "Handcrafted Manoushe, Pizza, and Pastries baked to perfection",
     "all": "All",

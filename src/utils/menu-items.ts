@@ -44,6 +44,27 @@ export type PublicMenuItem = {
   categoryId: string | null;
 };
 
+export type MenuSort = 'name' | 'priceAsc' | 'priceDesc';
+
+type SortableMenuItem = { name: string; sizes: Array<{ price: number }> };
+
+// An item's price for sorting is its cheapest size; items without sizes go last.
+export function sortMenuItems<T extends SortableMenuItem>(items: T[], sort: MenuSort, locale: string): T[] {
+  const byName = (a: T, b: T) => a.name.localeCompare(b.name, locale);
+  if (sort === 'name') return [...items].sort(byName);
+
+  const lowestPrice = (item: T) => Math.min(...item.sizes.map((size) => Number(size.price)));
+  const direction = sort === 'priceAsc' ? 1 : -1;
+  return [...items].sort((a, b) => {
+    const priceA = lowestPrice(a);
+    const priceB = lowestPrice(b);
+    if (priceA === priceB) return byName(a, b);
+    if (!Number.isFinite(priceA)) return 1;
+    if (!Number.isFinite(priceB)) return -1;
+    return (priceA - priceB) * direction;
+  });
+}
+
 type GetPublicMenuItemsArgs = {
   supabase: SupabaseServerClient;
   locale: string;
@@ -76,7 +97,8 @@ export async function getPublicMenuItems({
         categories_translations(locale, name)
       )
     `)
-    .eq('is_active', true);
+    .eq('is_active', true)
+    .order('name', { ascending: true });
 
   const query = typeof limit === 'number' ? baseQuery.limit(limit) : baseQuery;
   const { data } = await query;
