@@ -65,7 +65,7 @@ export type MenuItemSizeTranslationInsertType = {
 };
 
 export type MenuItemWithRelations = MenuItemRowType & {
-  category: Pick<CategoryRowType, "id" | "name"> | null;
+  category: Pick<CategoryRowType, "id" | "name" | "is_active"> | null;
   menu_item_sizes?: (MenuItemSizeRowType & {
     menu_item_size_translations?: MenuItemSizeTranslationRowType[];
   })[];

@@ -42,7 +42,7 @@ export default async function Home() {
       id: category.id,
       name: localizedName,
     };
-  });
+  }).sort((a, b) => a.name.localeCompare(b.name, locale));
 
   const menuItems = await getPublicMenuItems({
     supabase,

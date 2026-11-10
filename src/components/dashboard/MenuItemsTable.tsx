@@ -287,6 +287,8 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
             >
               {menuItems.map((item) => {
                 const imageUrl = getImageUrl(item.image_key);
+                const isCategoryDisabled = item.category?.is_active === false;
+                const isShown = item.is_active && !isCategoryDisabled;
                 return (
                   <TableRow key={item.id}>
                     <TableCell>
@@ -320,9 +322,16 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                       )}
                     </TableCell>
                     <TableCell>
-                      <Chip size="sm" color={item.is_active ? "primary" : "default"}>
-                        {item.is_active ? t("filters.active") : t("filters.inactive")}
-                      </Chip>
+                      <div className="flex flex-wrap gap-2">
+                        <Chip size="sm" color={isShown ? "primary" : "default"}>
+                          {isShown ? t("filters.active") : t("filters.inactive")}
+                        </Chip>
+                        {isCategoryDisabled ? (
+                          <Chip size="sm" color="warning" variant="flat">
+                            {t("table.categoryDisabled")}
+                          </Chip>
+                        ) : null}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-2">
@@ -357,6 +366,7 @@ export function MenuItemsTable({ locale }: MenuItemsTableProps) {
                           size="sm"
                           color={item.is_active ? "warning" : "success"}
                           variant="flat"
+                          isDisabled={isCategoryDisabled}
                           startContent={
                             item.is_active ? (
                               <PowerOff size={14} />

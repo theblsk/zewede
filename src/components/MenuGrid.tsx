@@ -8,6 +8,7 @@ import { Wheat } from 'lucide-react';
 import Image from "next/image";
 import { useLocale, useTranslations } from 'next-intl';
 import { getImageUrl } from '@/utils/image-upload';
+import { sortMenuItems, type MenuSort } from '@/utils/menu-items';
 
 type MenuCategory = {
   id: string;
@@ -38,6 +39,7 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
   const locale = useLocale();
   const isRTL = locale === 'ar';
   const [activeCategoryId, setActiveCategoryId] = useState<string | null>(null);
+  const [sort, setSort] = useState<MenuSort>('name');
   const itemStagger = 0.08;
 
   const categoryIdsWithItems = useMemo(() => {
@@ -55,9 +57,15 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
     [categories, categoryIdsWithItems]
   );
 
-  const filteredItems = activeCategoryId
-    ? items.filter((item) => item.categoryId === activeCategoryId)
-    : items;
+  const filteredItems = useMemo(
+    () =>
+      sortMenuItems(
+        activeCategoryId ? items.filter((item) => item.categoryId === activeCategoryId) : items,
+        sort,
+        locale
+      ),
+    [items, activeCategoryId, sort, locale]
+  );
 
   const hasItems = filteredItems.length > 0;
 
@@ -73,6 +81,21 @@ export default function MenuGrid({ categories, items }: MenuGridProps) {
             {t('subtitle')}
           </p>
         </div>
+
+        {items.length > 1 && (
+          <label className="flex items-center gap-2 mb-4 text-sm font-semibold text-hlb-primary justify-center sm:justify-end">
+            {t('sort.label')}
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value as MenuSort)}
+              className="rounded-full border border-hlb-primary/20 bg-white px-3 py-1.5 text-sm font-semibold text-hlb-primary"
+            >
+              <option value="name">{t('sort.name')}</option>
+              <option value="priceAsc">{t('sort.priceAsc')}</option>
+              <option value="priceDesc">{t('sort.priceDesc')}</option>
+            </select>
+          </label>
+        )}
 
         {visibleCategories.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8 justify-center sm:justify-start">

@@ -1080,7 +1080,7 @@ export const getMenuItemsForDashboard = async (filters?: DashboardMenuItemFilter
     .from('menu_items')
     .select(
       `*, 
-       category:categories(id, name),
+       category:categories(id, name, is_active),
        menu_item_sizes(
          id,
          price,
@@ -1093,10 +1093,6 @@ export const getMenuItemsForDashboard = async (filters?: DashboardMenuItemFilter
 
   if (filters?.categoryIds?.length) {
     query = query.in('category_id', filters.categoryIds);
-  }
-
-  if (filters?.activeStatuses?.length === 1) {
-    query = query.eq('is_active', filters.activeStatuses[0] === 'active');
   }
 
   if (search) {
@@ -1157,6 +1153,14 @@ export const getMenuItemsForDashboard = async (filters?: DashboardMenuItemFilter
       description_ar: arItem?.description ?? null,
     } as MenuItemWithRelations;
   });
+
+  // An item under a disabled category counts as inactive, whatever its own flag says.
+  if (filters?.activeStatuses?.length === 1) {
+    const wantActive = filters.activeStatuses[0] === 'active';
+    return items.filter(
+      (item) => (item.is_active && item.category?.is_active !== false) === wantActive
+    );
+  }
 
   return items;
 };
