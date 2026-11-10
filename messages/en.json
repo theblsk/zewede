@@ -144,13 +144,13 @@
         },
         "enable": {
           "title": "Confirm Enable",
-          "content": "Are you sure you want to enable {name}?",
+          "content": "Are you sure you want to enable {name}? Its items will go back to the status they had before it was disabled.",
           "confirm": "Enable",
           "cancel": "Cancel"
         },
         "disable": {
           "title": "Confirm Disable",
-          "content": "Are you sure you want to disable {name}?",
+          "content": "Are you sure you want to disable {name}? Every item in this category will be hidden from the menu until you enable it again.",
           "confirm": "Disable",
           "cancel": "Cancel"
         }
@@ -209,6 +209,7 @@
         "placeholder": "Search menu items"
       },
       "table": {
+        "categoryDisabled": "Category disabled",
         "title": "Menu Items",
         "ariaLabel": "Menu items",
         "columns": {

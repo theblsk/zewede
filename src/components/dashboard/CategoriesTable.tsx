@@ -104,6 +104,7 @@ export function CategoriesTable({ locale }: CategoriesTableProps) {
       const response = await toggleCategoryActive(formData);
       if (response.ok) {
         queryClient.invalidateQueries({ queryKey: ['categories'] });
+        queryClient.invalidateQueries({ queryKey: ['menuItems'] });
         startTransition(() => {
           router.refresh();
         });

@@ -91,13 +91,16 @@ export async function getPublicMenuItems({
         is_active,
         menu_item_size_translations(locale, name)
       ),
-      category:categories(
+      category:categories!inner(
         id,
         name,
         categories_translations(locale, name)
       )
     `)
     .eq('is_active', true)
+    // A disabled category hides everything under it; item flags stay untouched,
+    // so re-enabling the category restores each item's previous state.
+    .eq('category.is_active', true)
     .order('name', { ascending: true });
 
   const query = typeof limit === 'number' ? baseQuery.limit(limit) : baseQuery;
